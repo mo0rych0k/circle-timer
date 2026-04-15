@@ -6,7 +6,7 @@ android-targetSdk = "36"
 app-build = "1"
 app-version = "0.0.1"
 
-agp = "9.0.1"
+agp = "9.1.0"
 androidx-activity = "1.13.0"
 androidx-core = "1.18.0"
 androidx-espresso = "3.7.0"
