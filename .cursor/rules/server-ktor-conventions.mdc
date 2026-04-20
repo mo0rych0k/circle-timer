@@ -1,0 +1,26 @@
+---
+description: Server-side Ktor conventions and orchestration rules
+globs: server/**
+alwaysApply: false
+---
+
+# Server Ktor Conventions
+
+## Required Orchestration
+- For substantive work under `server/**`, first invoke `.cursor/skills/server-ktor-orchestrator/SKILL.md`.
+- If the server change also affects shared code under `common/**`, invoke `.cursor/skills/common-module-orchestrator/SKILL.md`.
+- Before completion, invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`.
+
+## Application structure
+- Keep server bootstrap in `Application.kt` or similarly focused entry files.
+- Keep Ktor `Application.module()` wiring readable and small.
+- Prefer extracting route or plugin setup when `module()` starts accumulating unrelated concerns.
+
+## Ktor testing
+- Prefer `testApplication { ... }` for server tests.
+- Verify HTTP status and response body behavior explicitly.
+- Keep tests in `server/src/test/kotlin`.
+
+## Boundaries
+- Do not move feature-specific client/UI logic into `server/`.
+- If shared abstractions are needed by both server and KMP clients, place them deliberately in `common/**` and validate boundaries through the common-module orchestrator.

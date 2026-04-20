@@ -6,6 +6,12 @@ alwaysApply: false
 
 # Data-Network Layer: Remote Data Sources
 
+## Required Orchestration
+- When changing an existing feature data-network module, first invoke `.cursor/skills/feature-edit-review-orchestrator/SKILL.md`.
+- Select `data-network-dispatchers` for remote data source, dispatcher, Ktor call, or DTO-layer changes.
+- If the change touches shared networking or threading abstractions in `common/**`, also invoke `.cursor/skills/common-module-orchestrator/SKILL.md`.
+- Before completion, invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`.
+
 ## 1) Define contracts + implementations in data-network
 - `*-data-network` must define:
   - `interface *RemoteDataSource`

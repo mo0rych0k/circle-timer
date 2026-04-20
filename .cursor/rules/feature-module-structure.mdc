@@ -4,7 +4,17 @@ alwaysApply: false
 ---
 
 ## Scope
-This rules file is intended **exclusively** for use by the agent `.cursor/agents/feature-module-generator.md` during new feature scaffolding.
+Use this rule when creating or extending a feature under `features/<featureName>/`.
+
+## Required Orchestration
+- Do not scaffold a feature manually from memory.
+- First invoke the project skill `.cursor/skills/feature-scaffolding-orchestrator/SKILL.md`.
+- Use that skill as the entry point for:
+  - module creation,
+  - app/root integration,
+  - reviewer/enforcer subagent selection,
+  - repo-specific verification.
+- If the request is only to edit or review an existing feature, use `.cursor/skills/feature-edit-review-orchestrator/SKILL.md` instead.
 
 ## Feature structure
 
@@ -88,6 +98,18 @@ This rules file is intended **exclusively** for use by the agent `.cursor/agents
     - domain use cases
     - ui components / Decompose components
   - Keep registrations split per layer, in separate files.
+- **5. Integrate the feature into the repository root wiring**:
+  - Add the new modules to `settings.gradle.kts`.
+  - Add the feature module dependencies to `composeApp/build.gradle.kts`.
+  - Add feature Koin modules to `composeApp/src/commonMain/kotlin/io/pylyp/sample/composeapp/di/AppModules.kt`.
+  - If the feature is navigable from the app shell, update:
+    - `common/core-navigation`
+    - `composeApp/.../roating/AppRootComponent.kt`
+    - `composeApp/.../roating/mapper/AppRootMapper.kt`
+- **6. Run repo verification before completion**:
+  - Invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`.
+  - Run targeted Gradle verification for the touched feature modules.
+  - Run the structure check script when modules or root integration changed.
 
 ## Special cases: ui-components
 

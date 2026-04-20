@@ -6,6 +6,12 @@ alwaysApply: false
 
 # UI/Domain MVI: State + Methods + Wiring
 
+## Required Orchestration
+- When changing Store, State, Intent, Label, or Component wiring, first invoke `.cursor/skills/feature-edit-review-orchestrator/SKILL.md`.
+- Select `ui-mvi-state-wiring` for MVI contract and Store/Component/Screen flow changes.
+- If the change also requires domain contract updates, add `domain-resource-errors`.
+- Before completion, invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`.
+
 ## 1) MVI contracts must be explicit in UI
 - In `*-ui` define a `*Store` that extends `Store<Intent, State, Label>`.
 - `Intent` must be a `sealed` hierarchy of typed events.

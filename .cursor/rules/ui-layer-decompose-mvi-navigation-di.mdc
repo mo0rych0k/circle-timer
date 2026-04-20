@@ -6,6 +6,13 @@ alwaysApply: false
 
 # UI Layer: Decompose + MVI + App Navigation/DI
 
+## Required Orchestration
+- When changing an existing feature UI module, first invoke `.cursor/skills/feature-edit-review-orchestrator/SKILL.md`.
+- Select at least:
+  - `ui-navigation-di` for root/navigation/DI changes,
+  - `ui-mvi-state-wiring` for Store/Component/Screen wiring changes.
+- After substantive UI changes, invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`.
+
 ## 1) What this module must produce
 - Decompose `*RootComponent` for the feature (top-level or nested navigation inside the feature).
 - MVI `Store` + `*Component` that exposes immutable UI state and accepts UI intents/events.

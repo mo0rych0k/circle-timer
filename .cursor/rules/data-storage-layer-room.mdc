@@ -6,6 +6,11 @@ alwaysApply: false
 
 # Data-Storage Layer: Persistence (Room/DB)
 
+## Required Orchestration
+- For substantive changes in `common/persistence/persistence-database`, first invoke `.cursor/skills/common-module-orchestrator/SKILL.md`.
+- If the persistence change also requires consumer fixes in feature data modules, use `.cursor/skills/feature-edit-review-orchestrator/SKILL.md` and select `data-storage-room` plus any affected data categories.
+- Before completion, invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`.
+
 ## 1) Storage is persistence-only
 - `common/persistence/persistence-database` contains:
   - storage entities (`*SD`)
