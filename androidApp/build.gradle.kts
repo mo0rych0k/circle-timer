@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.ApplicationExtension
+import io.pylyp.buildgradle.logic.Constants
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -7,14 +8,14 @@ plugins {
 
 project.extensions.configure<ApplicationExtension> {
     namespace = "com.pylyp.sample"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = Constants.ANDROID_COMPILE_SDK
 
     defaultConfig {
-        applicationId = "com.pylyp.sample"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = libs.versions.app.build.get().toInt()
-        versionName = libs.versions.app.version.get()
+        applicationId = "io.pylyp.everydaytask"
+        minSdk = Constants.ANDROID_MIN_SDK
+        targetSdk = Constants.ANDROID_TARGET_SDK
+        versionCode = Constants.APP_BUILD
+        versionName = Constants.APP_VERSION
     }
 
     buildFeatures {

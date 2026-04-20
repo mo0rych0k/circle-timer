@@ -3,9 +3,8 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.pylyp.common.core.domain"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
     }
 
     sourceSets {

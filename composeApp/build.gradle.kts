@@ -10,9 +10,9 @@ plugins {
 val appPackageName = "io.pylyp.sample.composeapp"
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = appPackageName
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
+
     }
 
     targets.withType<KotlinNativeTarget>().configureEach {

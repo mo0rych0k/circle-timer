@@ -1,4 +1,4 @@
-import io.pylyp.build.logic.libs
+import io.pylyp.buildgradle.logic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

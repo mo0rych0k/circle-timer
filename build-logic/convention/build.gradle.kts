@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "io.pylyp.build.logic"
+group = "io.pylyp.buildgradle.logic"
 
 dependencies {
     implementation(libs.android.gradlePlugin)
@@ -29,7 +29,7 @@ gradlePlugin {
         }
         register("iosVersionUpdate") {
             id = "io.pylyp.ios.versionUpdate"
-            implementationClass = "io.pylyp.build.logic.IosVersionUpdatePlugin"
+            implementationClass = "io.pylyp.buildgradle.logic.IosVersionUpdatePlugin"
         }
     }
 }

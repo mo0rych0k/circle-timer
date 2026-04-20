@@ -3,8 +3,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.pylyp.common.app.info"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
     }
 }

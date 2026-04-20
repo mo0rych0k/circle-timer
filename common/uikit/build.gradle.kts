@@ -6,9 +6,9 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.pylyp.common.uikit"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
+
 
         androidResources.enable = true
     }

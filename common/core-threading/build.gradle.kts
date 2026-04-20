@@ -3,9 +3,8 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.pylyp.core.threading"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
     }
 
     sourceSets {

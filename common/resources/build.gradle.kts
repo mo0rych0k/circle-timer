@@ -6,9 +6,9 @@ plugins {
 val modulePackage = "io.pylyp.common.resources"
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = modulePackage
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
+
         androidResources.enable = true
     }
 

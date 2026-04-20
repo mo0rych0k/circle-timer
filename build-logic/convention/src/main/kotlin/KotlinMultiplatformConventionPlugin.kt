@@ -1,5 +1,6 @@
-import io.pylyp.build.logic.Constants
-import io.pylyp.build.logic.libs
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import io.pylyp.buildgradle.logic.Constants
+import io.pylyp.buildgradle.logic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -11,30 +12,30 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 class KotlinMultiplatformConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
 
-        with(pluginManager) {
-            apply(libs.findPlugin("kotlinMultiplatform").get().get().pluginId)
-            apply(libs.findPlugin("kotlinMultiplatformLibrary").get().get().pluginId)
-        }
+        val compileSdk = Constants.ANDROID_COMPILE_SDK
+        val minSdk = Constants.ANDROID_MIN_SDK
+
+        pluginManager.apply(libs.findPlugin("kotlinMultiplatform").get().get().pluginId)
+        pluginManager.apply(libs.findPlugin("kotlinMultiplatformLibrary").get().get().pluginId)
 
         extensions.configure<KotlinMultiplatformExtension> {
             explicitApi = ExplicitApiMode.Strict
 
+            jvm()
             iosArm64()
             iosSimulatorArm64()
 
             targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
                 binaries.all {
-                    // Each -linker-option forwards exactly one flag to the Apple linker; version must be a separate -linker-option.
                     freeCompilerArgs += listOf(
                         "-linker-option",
                         "-ios_version_min",
-                        "-linker-option",
                         Constants.IOS_MIN_VERSION,
                     )
                 }
             }
 
-            jvm()
+
 
             compilerOptions {
                 freeCompilerArgs.add("-Xexpect-actual-classes")
@@ -45,6 +46,13 @@ class KotlinMultiplatformConventionPlugin : Plugin<Project> {
                     optIn("kotlin.ExperimentalStdlibApi")
                     optIn("kotlin.time.ExperimentalTime")
                     optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+                }
+            }
+
+            plugins.withId("com.android.kotlin.multiplatform.library") {
+                targets.withType(KotlinMultiplatformAndroidLibraryTarget::class.java).configureEach {
+                    this.compileSdk = compileSdk
+                    this.minSdk = minSdk
                 }
             }
         }

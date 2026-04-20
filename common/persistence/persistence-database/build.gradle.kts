@@ -6,9 +6,9 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.pylyp.common.core.persistence.db"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
+
     }
 
     sourceSets {

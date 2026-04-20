@@ -4,9 +4,9 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.pylyp.weather.domain"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
+
     }
 
     sourceSets {

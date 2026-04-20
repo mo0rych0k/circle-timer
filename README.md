@@ -20,52 +20,28 @@ architecture.
 - **[Coroutines & Flow](https://kotlinlang.org/docs/coroutines-overview.html)** — Reactive
   programming and asynchrony.
 
-## 🤖 Smart Development (Agent-Ready)
+## 🧱 Build Configuration (Important)
 
-This project is built with modern AI assistants in mind. It includes a set of tools that allow AI to
-understand the project structure and automate routine tasks.
+Build and app version values are now centralized in build logic constants instead of
+`gradle/libs.versions.toml`.
 
-### 🛠 Skills & Subagents
+- **Source of truth**:
+  `build-logic/convention/src/main/kotlin/io/pylyp/buildgradle/logic/Constants.kt`
+- **What is stored there**:
+    - Android SDK versions (`compileSdk`, `minSdk`, `targetSdk`)
+    - App version metadata (`APP_VERSION`, `APP_BUILD`)
+    - iOS minimum deployment version (`IOS_MIN_VERSION`)
+- **Version catalog scope**: `gradle/libs.versions.toml` is focused on dependency/plugin versions.
 
-Detailed instructions for AI agents located in `.agents/skills/`:
+### iOS Version Sync
 
-- 🔄 `template-setup` — Quick start of a new project and package renaming.
-- 🏗 `team-builder` — Tool for coordinating a team of subagents.
-- 📦 `kotlin-room-patterns` — Database interaction patterns.
-- 🌐 `kotlin-ktor-patterns` — Network interaction and API patterns.
-- 🧪 `kotlin-testing` — Testing standards (Kotest, MockK).
-- 🔒 `security-scan` — Configuration vulnerability scanning.
-- 🧐 `verification-loop` — Automated result verification system.
+The `updateIosVersion` Gradle task now reads app version/build from `Constants` and updates:
 
-### 📋 Rules
+- `iosApp/iosApp/Info.plist`
+- `iosApp/iosApp.xcodeproj/project.pbxproj`
 
-The `.cursor/rules` directory contains rules (.mdc) that guide AI code generation:
-
-- **Architecture**: Deep understanding of Decompose and MVI.
-- **Layers**: Strict separation of Domain, Data, and UI layers.
-- **Features**: Standardized approach for creating new feature modules.
-
-## ⚙️ Initial Setup
-
-The template includes a powerful Python script for automatic configuration. This allows you to
-instantly change the project name and base package in every file.
-
-### `setup_project.py` Features:
-
-- 🔄 **Rename Project**: Updates the name in `settings.gradle.kts`.
-- 📦 **Refactor Packages**: Recursively replaces `io.pylyp` with your package and moves files
-  accordingly.
-- 🧹 **Clean Samples**: Removes demo modules (`coffee`, `weather`, `cover`).
-- ✅ **Database & Resources**: Cleans the database and resources from sample code.
-
-### Usage Example:
+Run:
 
 ```bash
-python3 .agents/skills/template-setup/scripts/setup_project.py \
-  --new-name "My Super App" \
-  --new-package "com.company.myapp"
+./gradlew updateIosVersion
 ```
-
-> [!IMPORTANT]
-> After the script completes, make sure to perform **Sync Project with Gradle Files** in your IDE (
-> Android Studio or IntelliJ IDEA).

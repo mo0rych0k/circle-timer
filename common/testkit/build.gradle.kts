@@ -3,9 +3,9 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.pylyp.common.testkit"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
+
     }
 
     sourceSets {
