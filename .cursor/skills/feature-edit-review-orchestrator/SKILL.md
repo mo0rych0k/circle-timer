@@ -1,6 +1,6 @@
 ---
 name: feature-edit-review-orchestrator
-description: Choose and run the minimal set of template reviewer/enforcer subagents to review/edit a specific feature, based on the kind of changes (UI navigation+DI, MVI state wiring, domain Resource/Error, data mappers, data-network dispatchers, persistence/Room).
+description: Choose and run the minimal set of reviewer or enforcer subagents for an existing feature in this KMP + Decompose + MVI repository. Use when editing, validating, or reviewing feature changes across UI navigation, MVI wiring, domain Resource/Error policies, data mappers, data-network dispatchers, persistence, and final repo verification.
 origin: project-template
 ---
 
@@ -44,6 +44,8 @@ Also ask for:
 
 - `featureName` (e.g., `weather`)
 - which files/paths changed (optional, but helps choose the exact reviewers)
+- whether root integration changed (`settings.gradle.kts`, `composeApp/build.gradle.kts`, app DI,
+  app navigation)
 
 ### 2) Select subagents (minimal set)
 
@@ -78,4 +80,13 @@ Summarize:
 - chosen categories + subagents that were actually run
 - the main issues fixed (if any)
 - any remaining risks/testing gaps
+
+## 5) Finish with repo verification
+
+Before declaring the feature clean:
+
+- invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`
+- run targeted verification for the touched feature modules
+- if root integration changed, also run the structure check script and mention those files
+  explicitly in the report
 

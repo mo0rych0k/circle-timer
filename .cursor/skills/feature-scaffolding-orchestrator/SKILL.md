@@ -1,6 +1,6 @@
 ---
 name: feature-scaffolding-orchestrator
-description: Orchestrate feature scaffolding using the template’s subagents, then run layer-specific reviewers/enforcers for correctness (UI/Navigation, MVI wiring, Domain use-cases, Data repository mappers, Data-network Ktor dispatchers).
+description: Orchestrate new feature creation for this KMP + Decompose + MVI repository. Use when creating a new feature, scaffolding feature modules, or adding a feature that must be wired into app navigation, app DI, Gradle module registration, and repo-specific verification.
 origin: project-template
 ---
 
@@ -21,8 +21,11 @@ Coordinate multiple specialized subagents so the resulting feature is:
 
 - scaffolded according to `.cursor/rules/feature-module-structure.mdc`
 - integrated into global app navigation via `AppFeature` and `AppRootConfig`
+- integrated into repo module wiring via `settings.gradle.kts`, `composeApp/build.gradle.kts`, and
+  `composeApp/.../di/AppModules.kt`
 - validated per layer (UI navigation+MVI DI, domain use-case/resource flow, data-network dispatcher
   usage, repository mapping boundaries)
+- verified with the repo verification skill before completion
 
 ## Workflow
 
@@ -38,6 +41,7 @@ Derive:
 
 - module paths: `features/<featureName>/<featureName>-{ui,domain,data,data-network}`
 - package namespaces: `io.pylyp.<featureName>.<layer>`
+- whether the feature is intentionally UI-only or must be full-stack
 
 ### 2) Scaffold the feature modules
 
@@ -50,6 +54,23 @@ Rules for this step:
 - Ensure `*-domain`, `*-data`, and `*-data-network` are scaffolded (create or reuse existing modules
   as required by the template rules).
 - Do NOT leave a feature only with `*-ui` unless the other modules already exist.
+
+### 2.5) Wire the feature into the repository root
+
+Update all required integration points:
+
+1. `settings.gradle.kts`
+    - include the new feature modules
+2. `composeApp/build.gradle.kts`
+    - add feature module dependencies used by the app
+3. `composeApp/src/commonMain/kotlin/io/pylyp/sample/composeapp/di/AppModules.kt`
+    - add feature Koin modules
+4. `common/core-navigation`
+    - add `AppFeature` entry when the feature is reachable through global navigation
+5. `composeApp/.../roating/AppRootComponent.kt`
+    - add `Child`, `AppRootConfig`, and `child(...)` wiring when needed
+6. `composeApp/.../roating/mapper/AppRootMapper.kt`
+    - map `AppFeature` to the app root config
 
 ### 3) UI + Navigation + DI validation gate
 
@@ -96,6 +117,14 @@ Use it to:
 
 - ensure Compose/Decompose UI is generated and wired in a single consistent loop
 
+## 7) Repo verification gate
+
+Before declaring the scaffolding complete:
+
+- invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`
+- run targeted Gradle checks for the touched modules
+- run the structure check script if modules, packages, or root integration changed
+
 ## Output requirements
 
 When finished, summarize:
@@ -103,5 +132,6 @@ When finished, summarize:
 - feature modules created/reused
 - where global navigation integration was updated (`AppFeature`, `AppRootComponent`,
   `AppRootMapper`, `app di modules`)
+- where root Gradle/app wiring was updated (`settings.gradle.kts`, `composeApp/build.gradle.kts`)
 - which reviewers/enforcers were run and whether they passed (or what was fixed)
 

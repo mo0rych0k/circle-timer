@@ -6,6 +6,11 @@ alwaysApply: false
 
 # Compose UI Generation (from MVI)
 
+## Required Orchestration
+- For Compose screen generation or substantial UI rendering changes, first invoke `.cursor/skills/feature-edit-review-orchestrator/SKILL.md`.
+- Select `ui-mvi-state-wiring` and add `ui-navigation-di` if the root screen or feature navigation also changes.
+- Before completion, invoke `.cursor/skills/repo-verification-orchestrator/SKILL.md`.
+
 ## 1) Input: MVI Component + Store.State + Store.Intent
 - Compose screen should accept the feature `*Component` as a parameter.
 - Compose screen should render from `component.state` only.
