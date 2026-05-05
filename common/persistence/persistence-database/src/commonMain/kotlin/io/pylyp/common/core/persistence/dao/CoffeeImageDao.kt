@@ -1,10 +1,10 @@
-package io.pylyp.common.core.persistence.dao
+package com.circle.timer.common.core.persistence.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import io.pylyp.common.core.persistence.entity.CoffeeImageSD
+import com.circle.timer.common.core.persistence.entity.CoffeeImageSD
 import kotlinx.coroutines.flow.Flow
 
 @Dao

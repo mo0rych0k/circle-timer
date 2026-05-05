@@ -1,4 +1,4 @@
-package io.pylyp.common.core.persistence.entity
+package com.circle.timer.common.core.persistence.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -1,4 +1,4 @@
-package io.pylyp.common.core.foundation.entity
+package com.circle.timer.common.core.foundation.entity
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

@@ -5,7 +5,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.common.core.ui"
+        namespace = "com.circle.timer.common.core.ui"
 
     }
 

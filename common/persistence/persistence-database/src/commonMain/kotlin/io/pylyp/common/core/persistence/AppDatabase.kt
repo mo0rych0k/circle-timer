@@ -1,13 +1,13 @@
-package io.pylyp.common.core.persistence
+package com.circle.timer.common.core.persistence
 
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
-import io.pylyp.common.core.persistence.dao.CoffeeImageDao
-import io.pylyp.common.core.persistence.dao.WeatherLogDao
-import io.pylyp.common.core.persistence.entity.CoffeeImageSD
-import io.pylyp.common.core.persistence.entity.WeatherObservationLogSD
+import com.circle.timer.common.core.persistence.dao.CoffeeImageDao
+import com.circle.timer.common.core.persistence.dao.WeatherLogDao
+import com.circle.timer.common.core.persistence.entity.CoffeeImageSD
+import com.circle.timer.common.core.persistence.entity.WeatherObservationLogSD
 
 
 @Database(

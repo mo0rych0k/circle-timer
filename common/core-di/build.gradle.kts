@@ -4,7 +4,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.common.core.di"
+        namespace = "com.circle.timer.common.core.di"
     }
 
     sourceSets {

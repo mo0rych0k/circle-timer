@@ -4,7 +4,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.utils.logging.impl"
+        namespace = "com.circle.timer.utils.logging.impl"
 
     }
 

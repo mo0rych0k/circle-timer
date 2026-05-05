@@ -1,4 +1,4 @@
-package io.pylyp.common.core.foundation.entity
+package com.circle.timer.common.core.foundation.entity
 
 public sealed interface Resource<out T> {
     public data object Idle : Resource<Nothing>

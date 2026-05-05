@@ -1,6 +1,6 @@
-package io.pylyp.core.threading.test
+package com.circle.timer.core.threading.test
 
-import io.pylyp.core.threading.DispatcherProvider
+import com.circle.timer.core.threading.DispatcherProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainCoroutineDispatcher

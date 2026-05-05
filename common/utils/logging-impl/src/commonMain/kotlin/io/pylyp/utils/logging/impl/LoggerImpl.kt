@@ -1,8 +1,8 @@
-package io.pylyp.utils.logging.impl
+package com.circle.timer.utils.logging.impl
 
 import co.touchlab.kermit.Logger
-import io.pylyp.common.app.info.AppEnvironment
-import io.pylyp.utils.logging.LoggerInterface
+import com.circle.timer.common.app.info.AppEnvironment
+import com.circle.timer.utils.logging.LoggerInterface
 
 public class LoggerImpl(
     private val environment: AppEnvironment,

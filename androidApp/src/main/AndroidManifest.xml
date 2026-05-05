@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:name="com.pylyp.sample.KmpMviApplication"
+        android:name="com.circle.timer.android.KmpMviApplication"
         android:allowBackup="true"
 
         android:icon="@mipmap/ic_launcher"
@@ -12,7 +12,7 @@
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
             android:exported="true"
-            android:name="com.pylyp.sample.MainActivity">
+            android:name="com.circle.timer.android.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

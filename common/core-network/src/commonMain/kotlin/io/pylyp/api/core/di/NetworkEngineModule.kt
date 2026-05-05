@@ -1,6 +1,6 @@
-package io.pylyp.api.core.di
+package com.circle.timer.api.core.di
 
-import io.pylyp.api.core.client.provideHttpClientEngine
+import com.circle.timer.api.core.client.provideHttpClientEngine
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

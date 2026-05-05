@@ -1,8 +1,8 @@
-package io.pylyp.common.core.persistence.di
+package com.circle.timer.common.core.persistence.di
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import io.pylyp.common.core.persistence.AppDatabase
+import com.circle.timer.common.core.persistence.AppDatabase
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import platform.Foundation.NSDocumentDirectory

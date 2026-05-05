@@ -1,4 +1,4 @@
-package io.pylyp.utils.logging
+package com.circle.timer.utils.logging
 
 public interface LoggerInterface {
 

@@ -1,4 +1,4 @@
-rootProject.name = "kmp-decompose-mvi-template"
+rootProject.name = "circle-timer"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -58,20 +58,12 @@ include(
     ":common:persistence:persistence-database",
 )
 
-include(":features:cover:cover-ui")
+include(":features:onboarding:onboarding-ui")
 
 include(
-    ":features:coffee:coffee-data",
-    ":features:coffee:coffee-data-network",
-    ":features:coffee:coffee-domain",
-    ":features:coffee:coffee-ui",
-)
-
-include(
-    ":features:weather:weather-data-network",
-    ":features:weather:weather-data",
-    ":features:weather:weather-domain",
-    ":features:weather:weather-ui",
+    ":features:timer:timer-data",
+    ":features:timer:timer-domain",
+    ":features:timer:timer-ui",
 )
 
 

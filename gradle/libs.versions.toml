@@ -29,6 +29,7 @@ ksp = "2.3.5"
 kermit = "2.1.0"
 turbine = "1.2.1"
 compass = "3.0.2"
+multiplatform-settings = "1.3.0"
 
 [libraries]
 #Tests
@@ -113,6 +114,8 @@ compass-geolocation-mobile = { module = "dev.jordond.compass:geolocation-mobile"
 compass-permissions-mobile = { module = "dev.jordond.compass:permissions-mobile", version.ref = "compass" }
 compass-geocoder = { module = "dev.jordond.compass:geocoder", version.ref = "compass" }
 compass-geocoder-mobile = { module = "dev.jordond.compass:geocoder-mobile", version.ref = "compass" }
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatform-settings" }
+multiplatform-settings-noarg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatform-settings" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -128,9 +131,9 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
 gradleAndroidCacheFix = { id = "org.gradle.android.cache-fix", version.ref = "gradle-android-cache-fix" }
 
-app-kotlinMultiplatform = { id = "io.pylyp.kotlin.multiplatform" }
-app-composeMultiplatform = { id = "io.pylyp.kotlin.composeMultiplatform" }
-app-iosVersionUpdate = { id = "io.pylyp.ios.versionUpdate" }
+app-kotlinMultiplatform = { id = "com.circle.timer.kotlin.multiplatform" }
+app-composeMultiplatform = { id = "com.circle.timer.kotlin.composeMultiplatform" }
+app-iosVersionUpdate = { id = "com.circle.timer.ios.versionUpdate" }
 
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }

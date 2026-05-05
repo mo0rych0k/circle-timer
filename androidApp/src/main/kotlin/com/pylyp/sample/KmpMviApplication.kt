@@ -1,8 +1,8 @@
-package com.pylyp.sample
+package com.circle.timer.android
 
 import android.app.Application
-import com.pylyp.sample.di.androidAppModule
-import io.pylyp.sample.composeapp.di.initKoin
+import com.circle.timer.android.di.androidAppModule
+import com.circle.timer.composeapp.di.initKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 

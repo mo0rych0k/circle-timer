@@ -1,4 +1,4 @@
-package io.pylyp.common.uikit.components
+package com.circle.timer.common.uikit.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.pylyp.common.uikit.AppTheme
+import com.circle.timer.common.uikit.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -6,7 +6,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.core.navigation"
+        namespace = "com.circle.timer.core.navigation"
 
     }
 

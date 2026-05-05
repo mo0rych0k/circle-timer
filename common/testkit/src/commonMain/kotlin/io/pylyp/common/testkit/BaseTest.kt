@@ -1,14 +1,14 @@
-package io.pylyp.common.testkit
+package com.circle.timer.common.testkit
 
-import io.pylyp.common.core.di.IsolatedKoinContext
-import io.pylyp.core.threading.test.di.testDispatchersModule
-import io.pylyp.core.threading.test.testDispatcher
+import com.circle.timer.common.core.di.IsolatedKoinContext
+import com.circle.timer.core.threading.test.di.testDispatchersModule
+import com.circle.timer.core.threading.test.testDispatcher
+import org.koin.core.module.Module
+import org.koin.dsl.module
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
-import org.koin.core.module.Module
-import org.koin.dsl.module
 
 /**
  * Extend this from your test class and call [beforeTest] / [afterTest]

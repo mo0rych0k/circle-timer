@@ -1,5 +1,5 @@
 import com.android.build.api.dsl.ApplicationExtension
-import io.pylyp.buildgradle.logic.Constants
+import com.circle.timer.buildgradle.logic.Constants
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -7,11 +7,11 @@ plugins {
 }
 
 project.extensions.configure<ApplicationExtension> {
-    namespace = "com.pylyp.sample"
+    namespace = "com.circle.timer.android"
     compileSdk = Constants.ANDROID_COMPILE_SDK
 
     defaultConfig {
-        applicationId = "io.pylyp.everydaytask"
+        applicationId = "com.circle.timer"
         minSdk = Constants.ANDROID_MIN_SDK
         targetSdk = Constants.ANDROID_TARGET_SDK
         versionCode = Constants.APP_BUILD

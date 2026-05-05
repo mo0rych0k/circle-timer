@@ -7,7 +7,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.common.uikit"
+        namespace = "com.circle.timer.common.uikit"
 
 
         androidResources.enable = true

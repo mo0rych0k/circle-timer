@@ -1,7 +1,7 @@
-package io.pylyp.common.core.persistence
+package com.circle.timer.common.core.persistence
 
-import io.pylyp.common.core.persistence.db.DatabaseCreator
-import io.pylyp.common.core.persistence.entity.WeatherObservationLogSD
+import com.circle.timer.common.core.persistence.db.DatabaseCreator
+import com.circle.timer.common.core.persistence.entity.WeatherObservationLogSD
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest

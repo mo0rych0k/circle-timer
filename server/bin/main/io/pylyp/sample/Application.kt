@@ -1,4 +1,4 @@
-package io.pylyp.sample
+package com.circle.timer.sample
 
 import io.ktor.server.application.Application
 import io.ktor.server.engine.embeddedServer

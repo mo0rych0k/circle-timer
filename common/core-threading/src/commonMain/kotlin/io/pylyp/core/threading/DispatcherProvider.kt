@@ -1,4 +1,4 @@
-package io.pylyp.core.threading
+package com.circle.timer.core.threading
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.MainCoroutineDispatcher

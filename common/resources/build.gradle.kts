@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.app.composeMultiplatform)
 }
 
-val modulePackage = "io.pylyp.common.resources"
+val modulePackage = "com.circle.timer.common.resources"
 
 kotlin {
     android {
@@ -24,6 +24,6 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "io.pylyp.common.resources"
+    packageOfResClass = "com.circle.timer.common.resources"
     generateResClass = always
 }

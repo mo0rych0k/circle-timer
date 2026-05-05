@@ -4,10 +4,10 @@ plugins {
     application
 }
 
-group = "io.pylyp.sample"
+group = "com.circle.timer.sample"
 version = "1.0.0"
 application {
-    mainClass.set("io.pylyp.sample.ApplicationKt")
+    mainClass.set("com.circle.timer.sample.ApplicationKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")

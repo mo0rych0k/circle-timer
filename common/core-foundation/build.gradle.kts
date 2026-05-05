@@ -4,7 +4,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.common.core.foundation"
+        namespace = "com.circle.timer.common.core.foundation"
 
     }
 

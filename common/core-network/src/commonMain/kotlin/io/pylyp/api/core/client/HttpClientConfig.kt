@@ -1,4 +1,4 @@
-package io.pylyp.api.core.client
+package com.circle.timer.api.core.client
 
 
 import io.ktor.client.HttpClient

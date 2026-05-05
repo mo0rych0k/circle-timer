@@ -1,6 +1,6 @@
-package io.pylyp.utils.logging
+package com.circle.timer.utils.logging
 
-import io.pylyp.common.core.di.IsolatedKoinContext
+import com.circle.timer.common.core.di.IsolatedKoinContext
 
 public object Logger {
 

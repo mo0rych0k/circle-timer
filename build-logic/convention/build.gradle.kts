@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "io.pylyp.buildgradle.logic"
+group = "com.circle.timer.buildgradle.logic"
 
 dependencies {
     implementation(libs.android.gradlePlugin)
@@ -20,16 +20,16 @@ tasks {
 gradlePlugin {
     plugins {
         register("kotlinMultiplatform") {
-            id = "io.pylyp.kotlin.multiplatform"
+            id = "com.circle.timer.kotlin.multiplatform"
             implementationClass = "KotlinMultiplatformConventionPlugin"
         }
         register("composeMultiplatform") {
-            id = "io.pylyp.kotlin.composeMultiplatform"
+            id = "com.circle.timer.kotlin.composeMultiplatform"
             implementationClass = "ComposeMultiplatformConventionPlugin"
         }
         register("iosVersionUpdate") {
-            id = "io.pylyp.ios.versionUpdate"
-            implementationClass = "io.pylyp.buildgradle.logic.IosVersionUpdatePlugin"
+            id = "com.circle.timer.ios.versionUpdate"
+            implementationClass = "com.circle.timer.buildgradle.logic.IosVersionUpdatePlugin"
         }
     }
 }

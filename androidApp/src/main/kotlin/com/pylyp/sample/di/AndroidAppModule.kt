@@ -1,7 +1,7 @@
-package com.pylyp.sample.di
+package com.circle.timer.android.di
 
-import com.pylyp.sample.BuildConfig
-import io.pylyp.common.app.info.AppEnvironment
+import com.circle.timer.android.BuildConfig
+import com.circle.timer.common.app.info.AppEnvironment
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

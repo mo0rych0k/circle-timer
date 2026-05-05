@@ -1,4 +1,4 @@
-package io.pylyp.core.navigation
+package com.circle.timer.core.navigation
 
 import com.arkivanov.decompose.Cancellation
 import com.arkivanov.decompose.value.Value

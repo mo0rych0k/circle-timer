@@ -1,4 +1,4 @@
-package io.pylyp.common.core.ui.mapper
+package com.circle.timer.common.core.ui.mapper
 
 import io.ktor.client.engine.darwin.DarwinHttpRequestException
 

@@ -4,7 +4,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.core.threading.test"
+        namespace = "com.circle.timer.core.threading.test"
 
     }
 

@@ -1,13 +1,13 @@
-package io.pylyp.common.core.ui.mapper
+package com.circle.timer.common.core.ui.mapper
 
-import io.pylyp.common.resources.Res
-import io.pylyp.common.resources.error_generic_message
-import io.pylyp.common.resources.error_generic_title
-import io.pylyp.common.resources.error_serialization_message
-import io.pylyp.common.resources.error_serialization_title
-import io.pylyp.common.uikit.entity.UiError
-import io.pylyp.common.uikit.entity.rawPrintableText
-import io.pylyp.common.uikit.entity.resPrintableText
+import com.circle.timer.common.resources.Res
+import com.circle.timer.common.resources.error_generic_message
+import com.circle.timer.common.resources.error_generic_title
+import com.circle.timer.common.resources.error_serialization_message
+import com.circle.timer.common.resources.error_serialization_title
+import com.circle.timer.common.uikit.entity.UiError
+import com.circle.timer.common.uikit.entity.rawPrintableText
+import com.circle.timer.common.uikit.entity.resPrintableText
 import kotlinx.coroutines.CancellationException
 
 /**

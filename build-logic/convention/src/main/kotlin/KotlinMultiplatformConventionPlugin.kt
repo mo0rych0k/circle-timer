@@ -1,6 +1,6 @@
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
-import io.pylyp.buildgradle.logic.Constants
-import io.pylyp.buildgradle.logic.libs
+import com.circle.timer.buildgradle.logic.Constants
+import com.circle.timer.buildgradle.logic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure

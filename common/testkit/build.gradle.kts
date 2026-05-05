@@ -4,7 +4,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.common.testkit"
+        namespace = "com.circle.timer.common.testkit"
 
     }
 

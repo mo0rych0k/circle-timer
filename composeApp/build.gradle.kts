@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
 }
 
-val appPackageName = "io.pylyp.sample.composeapp"
+val appPackageName = "com.circle.timer.composeapp"
 
 kotlin {
     android {
@@ -37,20 +37,10 @@ kotlin {
             implementation(projects.common.coreThreading)
             implementation(projects.common.persistence.persistenceDatabase)
 
-            /*feature-cover*/
-            implementation(projects.features.cover.coverUi)
-
-            /*feature-coffee*/
-            implementation(projects.features.coffee.coffeeData)
-            implementation(projects.features.coffee.coffeeDataNetwork)
-            implementation(projects.features.coffee.coffeeDomain)
-            implementation(projects.features.coffee.coffeeUi)
-
-            /*feature-weather*/
-            implementation(projects.features.weather.weatherData)
-            implementation(projects.features.weather.weatherDataNetwork)
-            implementation(projects.features.weather.weatherDomain)
-            implementation(projects.features.weather.weatherUi)
+            implementation(projects.features.onboarding.onboardingUi)
+            implementation(projects.features.timer.timerData)
+            implementation(projects.features.timer.timerDomain)
+            implementation(projects.features.timer.timerUi)
 
 
         }

@@ -1,15 +1,15 @@
-package io.pylyp.common.core.ui.mapper
+package com.circle.timer.common.core.ui.mapper
 
+import com.circle.timer.common.resources.Res
+import com.circle.timer.common.resources.error_network_message
+import com.circle.timer.common.resources.error_network_title
+import com.circle.timer.common.resources.error_ssl_message
+import com.circle.timer.common.resources.error_ssl_title
+import com.circle.timer.common.resources.error_timeout_message
+import com.circle.timer.common.resources.error_timeout_title
+import com.circle.timer.common.uikit.entity.UiError
+import com.circle.timer.common.uikit.entity.resPrintableText
 import io.ktor.client.engine.darwin.DarwinHttpRequestException
-import io.pylyp.common.resources.Res
-import io.pylyp.common.resources.error_network_message
-import io.pylyp.common.resources.error_network_title
-import io.pylyp.common.resources.error_ssl_message
-import io.pylyp.common.resources.error_ssl_title
-import io.pylyp.common.resources.error_timeout_message
-import io.pylyp.common.resources.error_timeout_title
-import io.pylyp.common.uikit.entity.UiError
-import io.pylyp.common.uikit.entity.resPrintableText
 import platform.Foundation.NSError
 import platform.Foundation.NSURLErrorCannotConnectToHost
 import platform.Foundation.NSURLErrorCannotFindHost

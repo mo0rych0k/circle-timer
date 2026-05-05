@@ -7,7 +7,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.common.core.persistence.db"
+        namespace = "com.circle.timer.common.core.persistence.db"
 
     }
 

@@ -1,4 +1,4 @@
-package io.pylyp.common.core.di
+package com.circle.timer.common.core.di
 
 import org.koin.core.Koin
 import org.koin.core.KoinApplication

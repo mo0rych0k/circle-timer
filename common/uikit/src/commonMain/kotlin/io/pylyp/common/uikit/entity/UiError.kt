@@ -1,4 +1,4 @@
-package io.pylyp.common.uikit.entity
+package com.circle.timer.common.uikit.entity
 
 import androidx.compose.runtime.Immutable
 import org.jetbrains.compose.resources.DrawableResource

@@ -1,0 +1,166 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "b7cfef288ae83680d6a4471c51e5f5d4",
+    "entities": [
+      {
+        "tableName": "CoffeeImageSD",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `url` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "weather_logs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `createdAtEpochMs` INTEGER NOT NULL, `latitude` REAL, `longitude` REAL, `locationLabel` TEXT, `userTemperatureC` REAL NOT NULL, `userHumidityPercent` INTEGER NOT NULL, `userPressureMmHg` INTEGER NOT NULL, `userWindDirectionKey` TEXT NOT NULL, `userWindStrengthPercent` INTEGER NOT NULL, `userWeatherTypeKey` TEXT NOT NULL, `apiTemperatureC` REAL, `apiHumidityPercent` INTEGER, `apiPressureMmHg` REAL, `apiWindDescription` TEXT, `apiDescription` TEXT, `temperatureDeltaC` REAL NOT NULL, `discrepancyLevelKey` TEXT NOT NULL, `isHighDiscrepancy` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMs",
+            "columnName": "createdAtEpochMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "locationLabel",
+            "columnName": "locationLabel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "userTemperatureC",
+            "columnName": "userTemperatureC",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userHumidityPercent",
+            "columnName": "userHumidityPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userPressureMmHg",
+            "columnName": "userPressureMmHg",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userWindDirectionKey",
+            "columnName": "userWindDirectionKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userWindStrengthPercent",
+            "columnName": "userWindStrengthPercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userWeatherTypeKey",
+            "columnName": "userWeatherTypeKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apiTemperatureC",
+            "columnName": "apiTemperatureC",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "apiHumidityPercent",
+            "columnName": "apiHumidityPercent",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "apiPressureMmHg",
+            "columnName": "apiPressureMmHg",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "apiWindDescription",
+            "columnName": "apiWindDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "apiDescription",
+            "columnName": "apiDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "temperatureDeltaC",
+            "columnName": "temperatureDeltaC",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discrepancyLevelKey",
+            "columnName": "discrepancyLevelKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isHighDiscrepancy",
+            "columnName": "isHighDiscrepancy",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_weather_logs_created_at_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "createdAtEpochMs"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_weather_logs_created_at_epoch_ms` ON `${TABLE_NAME}` (`createdAtEpochMs`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b7cfef288ae83680d6a4471c51e5f5d4')"
+    ]
+  }
+}

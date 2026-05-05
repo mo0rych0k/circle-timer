@@ -1,4 +1,4 @@
-package io.pylyp.sample
+package com.circle.timer.sample
 
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText

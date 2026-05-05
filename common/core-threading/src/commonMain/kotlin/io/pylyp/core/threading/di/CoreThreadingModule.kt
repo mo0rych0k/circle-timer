@@ -1,7 +1,7 @@
-package io.pylyp.core.threading.di
+package com.circle.timer.core.threading.di
 
-import io.pylyp.core.threading.DispatcherProvider
-import io.pylyp.core.threading.DispatcherProviderImpl
+import com.circle.timer.core.threading.DispatcherProvider
+import com.circle.timer.core.threading.DispatcherProviderImpl
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind

@@ -4,6 +4,6 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.pylyp.common.app.info"
+        namespace = "com.circle.timer.common.app.info"
     }
 }
