@@ -4,6 +4,7 @@ import com.circle.timer.features.timer.domain.TimerAudioPlayer
 
 internal expect class PlatformTimerAudioPlayer() : TimerAudioPlayer {
     override fun playInterval(intervalSeconds: Int)
+    override fun playCountdown(isBreak: Boolean, secondsRemaining: Int)
     override fun playCycleComplete()
     override fun stop()
 }

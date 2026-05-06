@@ -4,6 +4,9 @@ import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.circle.timer.features.timer.domain.TimerAudioPlayer
 import com.circle.timer.features.timer.domain.TimerSettings
 import com.circle.timer.features.timer.domain.TimerSettingsRepository
+import com.circle.timer.features.timer.domain.TimerWidgetSnapshot
+import com.circle.timer.features.timer.domain.TimerWidgetSnapshotRepository
+import com.circle.timer.features.timer.domain.idleTimerWidgetSnapshot
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -87,6 +90,7 @@ class TimerStoreFactoryTest {
         TimerStoreFactory(
             storeFactory = DefaultStoreFactory(),
             repository = repository,
+            snapshotRepository = FakeSnapshotRepository(repository.initial),
             audioPlayer = NoOpAudioPlayer(),
         ).create().also { it.init() }
 
@@ -105,12 +109,13 @@ class TimerStoreFactoryTest {
 
     private class NoOpAudioPlayer : TimerAudioPlayer {
         override fun playInterval(intervalSeconds: Int) = Unit
+        override fun playCountdown(isBreak: Boolean, secondsRemaining: Int) = Unit
         override fun playCycleComplete() = Unit
         override fun stop() = Unit
     }
 
     private class FakeRepository(
-        private val initial: TimerSettings,
+        val initial: TimerSettings,
     ) : TimerSettingsRepository {
         val saved: MutableList<TimerSettings> = mutableListOf()
 
@@ -123,5 +128,20 @@ class TimerStoreFactoryTest {
         override suspend fun isOnboardingCompleted(): Boolean = true
 
         override suspend fun setOnboardingCompleted(completed: Boolean) = Unit
+    }
+
+    private class FakeSnapshotRepository(
+        settings: TimerSettings,
+    ) : TimerWidgetSnapshotRepository {
+        private var snapshot: TimerWidgetSnapshot = idleTimerWidgetSnapshot(
+            totalDurationSeconds = settings.totalDurationSeconds,
+            breakDurationSeconds = settings.breakDurationSeconds,
+        )
+
+        override suspend fun getSnapshot(settings: TimerSettings): TimerWidgetSnapshot = snapshot
+
+        override suspend fun saveSnapshot(snapshot: TimerWidgetSnapshot) {
+            this.snapshot = snapshot
+        }
     }
 }

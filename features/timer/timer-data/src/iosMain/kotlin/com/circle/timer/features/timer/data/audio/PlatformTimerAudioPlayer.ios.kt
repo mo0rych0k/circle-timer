@@ -17,5 +17,9 @@ internal actual class PlatformTimerAudioPlayer actual constructor() :
         AudioServicesPlaySystemSound(1005u)
     }
 
+    actual override fun playCountdown(isBreak: Boolean, secondsRemaining: Int) {
+        AudioServicesPlaySystemSound(if (isBreak) 1025u else 1123u)
+    }
+
     actual override fun stop() = Unit
 }

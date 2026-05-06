@@ -17,6 +17,12 @@ public interface TimerStore : Store<TimerStore.Intent, TimerStore.State, Nothing
         public data class UpdateDuration(public val seconds: Int) : Intent
         public data class ToggleInterval(public val seconds: Int) : Intent
         public data class UpdateBreakDuration(public val seconds: Int) : Intent
+        public data class SetCountdownLast5TimerEnabled(public val enabled: Boolean) : Intent
+        public data class SetCountdownLast5BreakEnabled(public val enabled: Boolean) : Intent
+        public data object DismissNotificationPermissionSheet : Intent
+        public data object RequestNotificationPermission : Intent
+        public data class NotificationPermissionRequestResult(public val granted: Boolean) : Intent
+        public data object ConsumeSnackbar : Intent
         public data object SaveSettings : Intent
     }
 
@@ -26,6 +32,10 @@ public interface TimerStore : Store<TimerStore.Intent, TimerStore.State, Nothing
         public val progress: Float = 0f,
         public val phase: TimerPhase = TimerPhase.Active,
         public val showEditor: Boolean = false,
+        public val snackbarMessage: String? = null,
+        public val snackbarActionLabel: String? = null,
+        public val showNotificationPermissionSheet: Boolean = false,
+        public val requestNotificationPermission: Boolean = false,
         public val appliedSettings: TimerSettings = TimerSettings(),
         public val draftSettings: TimerSettings = TimerSettings(),
     )

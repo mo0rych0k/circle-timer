@@ -16,6 +16,10 @@ class CoalescingTimerAudioPlayerTest {
             events.add("playCycleComplete")
         }
 
+        override fun playCountdown(isBreak: Boolean, secondsRemaining: Int) {
+            events.add("playCountdown($isBreak,$secondsRemaining)")
+        }
+
         override fun stop() {
             events.add("stop")
         }
@@ -55,5 +59,13 @@ class CoalescingTimerAudioPlayerTest {
         val player = CoalescingTimerAudioPlayer(delegate)
         player.stop()
         assertEquals(listOf("stop"), delegate.events)
+    }
+
+    @Test
+    fun stops_before_countdown() {
+        val delegate = RecordingDelegate()
+        val player = CoalescingTimerAudioPlayer(delegate)
+        player.playCountdown(isBreak = false, secondsRemaining = 3)
+        assertEquals(listOf("stop", "playCountdown(false,3)"), delegate.events)
     }
 }

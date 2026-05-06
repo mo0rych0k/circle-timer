@@ -36,7 +36,8 @@ kotlin {
             implementation(projects.common.coreNetwork)
             implementation(projects.common.coreThreading)
             implementation(projects.common.persistence.persistenceDatabase)
-
+            implementation(projects.common.utils.logging)
+            implementation(projects.common.utils.loggingImpl)
             implementation(projects.features.onboarding.onboardingUi)
             implementation(projects.features.timer.timerData)
             implementation(projects.features.timer.timerDomain)

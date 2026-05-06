@@ -12,5 +12,9 @@ internal actual class PlatformTimerAudioPlayer actual constructor() :
         repeat(2) { Toolkit.getDefaultToolkit().beep() }
     }
 
+    actual override fun playCountdown(isBreak: Boolean, secondsRemaining: Int) {
+        Toolkit.getDefaultToolkit().beep()
+    }
+
     actual override fun stop() = Unit
 }

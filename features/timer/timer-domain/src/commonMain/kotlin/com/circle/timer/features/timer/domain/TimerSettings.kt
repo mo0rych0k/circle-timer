@@ -4,6 +4,9 @@ public data class TimerSettings(
     val totalDurationSeconds: Int = 60,
     val enabledIntervals: Set<Int> = emptySet(),
     val breakDurationSeconds: Int = 0,
+    val countdownLast5TimerEnabled: Boolean = true,
+    val countdownLast5BreakEnabled: Boolean = true,
+    val notificationPermissionPromptShown: Boolean = false,
 )
 
 public val supportedDurations: Set<Int> = setOf(10, 15, 30, 60)

@@ -5,23 +5,31 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
+import com.circle.timer.features.timer.domain.RuntimeConfig
+import com.circle.timer.features.timer.domain.RuntimeCue
+import com.circle.timer.features.timer.domain.RuntimePhase
 import com.circle.timer.features.timer.domain.TimerAudioPlayer
+import com.circle.timer.features.timer.domain.TimerPhase
+import com.circle.timer.features.timer.domain.TimerRuntimeEngine
 import com.circle.timer.features.timer.domain.TimerSettings
 import com.circle.timer.features.timer.domain.TimerSettingsRepository
+import com.circle.timer.features.timer.domain.TimerWidgetSnapshot
+import com.circle.timer.features.timer.domain.TimerWidgetSnapshotRepository
 import com.circle.timer.features.timer.domain.allowedIntervalsForDuration
+import com.circle.timer.features.timer.domain.idleTimerWidgetSnapshot
 import com.circle.timer.features.timer.domain.normalizeBreakDuration
 import com.circle.timer.features.timer.domain.normalizeDuration
 import com.circle.timer.features.timer.domain.normalizeIntervals
-import com.circle.timer.features.timer.domain.tickerSoundResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val TICK_MILLIS = 16L
+private const val TICK_MILLIS = 120L
 
 internal class TimerStoreFactory(
     private val storeFactory: StoreFactory,
     private val repository: TimerSettingsRepository,
+    private val snapshotRepository: TimerWidgetSnapshotRepository,
     private val audioPlayer: TimerAudioPlayer,
 ) {
     fun create(): TimerStore =
@@ -35,7 +43,10 @@ internal class TimerStoreFactory(
             ) {}
 
     private sealed interface Action {
-        data class Loaded(val settings: TimerSettings) : Action
+        data class Loaded(
+            val settings: TimerSettings,
+            val snapshot: TimerWidgetSnapshot,
+        ) : Action
     }
 
     private sealed interface Msg {
@@ -47,30 +58,35 @@ internal class TimerStoreFactory(
             val progress: Float,
             val phase: TimerStore.TimerPhase,
         ) : Msg
-
         data class SetShowEditor(val value: Boolean) : Msg
+        data class SetSnackbarMessage(val message: String?, val actionLabel: String?) : Msg
+        data class SetShowNotificationPermissionSheet(val value: Boolean) : Msg
+        data class SetRequestNotificationPermission(val value: Boolean) : Msg
     }
 
     private inner class BootstrapperImpl : CoroutineBootstrapper<Action>() {
         override fun invoke() {
             scope.launch {
-                dispatch(Action.Loaded(repository.getTimerSettings()))
+                val settings = repository.getTimerSettings()
+                val snapshot = snapshotRepository.getSnapshot(settings)
+                dispatch(Action.Loaded(settings = settings, snapshot = snapshot))
             }
         }
     }
 
     private inner class ExecutorImpl : CoroutineExecutor<TimerStore.Intent, Action, TimerStore.State, Msg, Nothing>() {
-        private var tickerJob: Job? = null
-        private var elapsedMillis: Long = 0L
+        private var runtimeJob: Job? = null
+        private var mirrorJob: Job? = null
+        private var runtimeEngine: TimerRuntimeEngine? = null
+        private var phaseStartedEpochMillis: Long = 0L
 
         override fun executeAction(action: Action) {
             when (action) {
                 is Action.Loaded -> {
                     val normalized = normalizeSettings(action.settings)
-                    dispatch(
-                        Msg.SetAppliedSettings(normalized),
-                    )
+                    dispatch(Msg.SetAppliedSettings(normalized))
                     dispatch(Msg.SetDraftSettings(normalized))
+                    applySnapshot(action.snapshot, normalized)
                 }
             }
         }
@@ -84,6 +100,17 @@ internal class TimerStoreFactory(
                 is TimerStore.Intent.UpdateDuration -> updateDuration(intent.seconds)
                 is TimerStore.Intent.ToggleInterval -> toggleInterval(intent.seconds)
                 is TimerStore.Intent.UpdateBreakDuration -> updateBreakDuration(intent.seconds)
+                is TimerStore.Intent.SetCountdownLast5TimerEnabled -> updateCountdownTimerEnabled(intent.enabled)
+                is TimerStore.Intent.SetCountdownLast5BreakEnabled -> updateCountdownBreakEnabled(intent.enabled)
+                TimerStore.Intent.DismissNotificationPermissionSheet -> dismissNotificationPermissionSheet()
+                TimerStore.Intent.RequestNotificationPermission -> requestNotificationPermission()
+                is TimerStore.Intent.NotificationPermissionRequestResult -> onNotificationPermissionResult(intent.granted)
+                TimerStore.Intent.ConsumeSnackbar -> dispatch(
+                    Msg.SetSnackbarMessage(
+                        message = null,
+                        actionLabel = null,
+                    ),
+                )
                 TimerStore.Intent.SaveSettings -> saveSettings()
             }
         }
@@ -93,7 +120,24 @@ internal class TimerStoreFactory(
                 stopAndReset()
                 return
             }
-            elapsedMillis = 0L
+            val now = nowEpochMillis()
+            val settings = state().appliedSettings
+            val missingNotificationPermission =
+                TimerServiceController.isServiceBackedRuntimeEnabled() && !TimerServiceController.hasNotificationPermission()
+            if (missingNotificationPermission) {
+                if (!state().appliedSettings.notificationPermissionPromptShown) {
+                    dispatch(Msg.SetShowNotificationPermissionSheet(true))
+                    return
+                }
+                dispatch(
+                    Msg.SetSnackbarMessage(
+                        message = "Timer started. Enable notifications for reliable background updates.",
+                        actionLabel = "Allow",
+                    ),
+                )
+            }
+            phaseStartedEpochMillis = now
+            runtimeEngine = TimerRuntimeEngine(runtimeConfig(settings)).also { it.start(now) }
             dispatch(
                 Msg.SetTimerVisuals(
                     elapsedMillis = 0L,
@@ -102,84 +146,117 @@ internal class TimerStoreFactory(
                 ),
             )
             dispatch(Msg.SetRunning(true))
-            // Play an immediate start cue.
-            audioPlayer.playInterval(intervalSeconds = 1)
-            startTicker()
+            dispatch(Msg.SetShowNotificationPermissionSheet(false))
+            persistSnapshot(
+                TimerWidgetSnapshot(
+                    isRunning = true,
+                    phase = TimerPhase.Active,
+                    phaseStartedEpochMillis = now,
+                    totalDurationSeconds = settings.totalDurationSeconds,
+                    breakDurationSeconds = settings.breakDurationSeconds,
+                ),
+            )
+            TimerServiceController.start(settings)
+            if (TimerServiceController.isServiceBackedRuntimeEnabled()) {
+                startMirrorTicker()
+            } else {
+                audioPlayer.playInterval(intervalSeconds = 1)
+                startRuntimeTicker()
+            }
         }
 
-        private fun startTicker() {
-            tickerJob?.cancel()
-            tickerJob = scope.launch {
+        private fun startRuntimeTicker() {
+            runtimeJob?.cancel()
+            runtimeJob = scope.launch {
                 while (true) {
                     delay(TICK_MILLIS)
-                    val previous = elapsedMillis
-                    elapsedMillis += TICK_MILLIS
-                    val phase = state().phase
-                    val phaseDurationSeconds = currentPhaseDurationSeconds(state(), phase)
-                    val durationMillis = phaseDurationSeconds * 1000L
-                    if (durationMillis <= 0L) continue
-                    val sound = tickerSoundResult(
-                        previousMillis = previous,
-                        elapsedMillis = elapsedMillis,
-                        durationMillis = durationMillis,
-                        enabledIntervals = if (phase == TimerStore.TimerPhase.Active) {
-                            state().appliedSettings.enabledIntervals
-                        } else {
-                            emptySet()
-                        },
-                    )
-                    when {
-                        sound.cycleComplete -> {
-                            // Always play finish sound at phase boundaries:
-                            // Active -> Break/Active and Break -> Active.
-                            audioPlayer.playCycleComplete()
-                            elapsedMillis = 0L
-                            val nextPhase = if (phase == TimerStore.TimerPhase.Active &&
-                                state().appliedSettings.breakDurationSeconds > 0
-                            ) {
-                                TimerStore.TimerPhase.Break
-                            } else {
-                                TimerStore.TimerPhase.Active
-                            }
-                            dispatch(
-                                Msg.SetTimerVisuals(
-                                    elapsedMillis = elapsedMillis,
-                                    progress = 0f,
-                                    phase = nextPhase,
-                                ),
-                            )
-                            continue
-                        }
-
-                        else -> {
-                            val intervalSec = sound.intervalSeconds
-                            if (intervalSec != null) {
-                                audioPlayer.playInterval(intervalSec)
-                            }
-                        }
-                    }
-                    dispatch(
-                        Msg.SetTimerVisuals(
-                            elapsedMillis = elapsedMillis,
-                            progress = (elapsedMillis.toFloat() / durationMillis.toFloat()).coerceIn(0f, 1f),
-                            phase = phase,
-                        ),
-                    )
+                    val engine = runtimeEngine ?: continue
+                    val step = engine.step(nowEpochMillis())
+                    consumeRuntimeStep(step)
                 }
             }
         }
 
+        private fun startMirrorTicker() {
+            mirrorJob?.cancel()
+            mirrorJob = scope.launch {
+                while (true) {
+                    val snapshot = snapshotRepository.getSnapshot(state().appliedSettings)
+                    val visuals = snapshot.resolveVisuals(nowEpochMillis())
+                    dispatch(Msg.SetRunning(visuals.isRunning))
+                    dispatch(
+                        Msg.SetTimerVisuals(
+                            elapsedMillis = elapsedFromVisuals(visuals.remainingSeconds, visuals.phase),
+                            progress = visuals.progress,
+                            phase = visuals.phase.toStorePhase(),
+                        ),
+                    )
+                    if (!visuals.isRunning) break
+                    delay(TICK_MILLIS)
+                }
+            }
+        }
+
+        private fun consumeRuntimeStep(step: com.circle.timer.features.timer.domain.RuntimeStepResult) {
+            val settings = state().appliedSettings
+            val durationMillis = when (step.state.phase) {
+                RuntimePhase.Active -> settings.totalDurationSeconds * 1000L
+                RuntimePhase.Break -> settings.breakDurationSeconds * 1000L
+            }.coerceAtLeast(1L)
+            phaseStartedEpochMillis = step.state.phaseStartedEpochMillis
+            when (val cue = step.cue) {
+                RuntimeCue.PhaseComplete -> {
+                    audioPlayer.playCycleComplete()
+                    persistSnapshot(
+                        TimerWidgetSnapshot(
+                            isRunning = true,
+                            phase = step.state.phase.toDomainPhase(),
+                            phaseStartedEpochMillis = step.state.phaseStartedEpochMillis,
+                            totalDurationSeconds = settings.totalDurationSeconds,
+                            breakDurationSeconds = settings.breakDurationSeconds,
+                        ),
+                    )
+                }
+
+                is RuntimeCue.IntervalTick -> audioPlayer.playInterval(cue.intervalSeconds)
+                is RuntimeCue.CountdownTick -> audioPlayer.playCountdown(
+                    isBreak = cue.phase == RuntimePhase.Break,
+                    secondsRemaining = cue.secondsRemaining,
+                )
+
+                null -> Unit
+            }
+            dispatch(
+                Msg.SetTimerVisuals(
+                    elapsedMillis = step.state.elapsedMillis,
+                    progress = (step.state.elapsedMillis.toFloat() / durationMillis.toFloat()).coerceIn(0f, 1f),
+                    phase = step.state.phase.toStorePhase(),
+                ),
+            )
+        }
+
         private fun stopAndReset() {
-            tickerJob?.cancel()
-            tickerJob = null
+            runtimeJob?.cancel()
+            runtimeJob = null
+            mirrorJob?.cancel()
+            mirrorJob = null
+            runtimeEngine = null
+            TimerServiceController.stop()
             audioPlayer.stop()
-            elapsedMillis = 0L
             dispatch(Msg.SetRunning(false))
             dispatch(
                 Msg.SetTimerVisuals(
                     elapsedMillis = 0L,
                     progress = 0f,
                     phase = TimerStore.TimerPhase.Active,
+                ),
+            )
+            dispatch(Msg.SetShowNotificationPermissionSheet(false))
+            dispatch(Msg.SetRequestNotificationPermission(false))
+            persistSnapshot(
+                idleTimerWidgetSnapshot(
+                    totalDurationSeconds = state().appliedSettings.totalDurationSeconds,
+                    breakDurationSeconds = state().appliedSettings.breakDurationSeconds,
                 ),
             )
         }
@@ -227,6 +304,26 @@ internal class TimerStoreFactory(
             )
         }
 
+        private fun updateCountdownTimerEnabled(enabled: Boolean) {
+            dispatch(
+                Msg.SetDraftSettings(
+                    state().draftSettings.copy(
+                        countdownLast5TimerEnabled = enabled,
+                    ),
+                ),
+            )
+        }
+
+        private fun updateCountdownBreakEnabled(enabled: Boolean) {
+            dispatch(
+                Msg.SetDraftSettings(
+                    state().draftSettings.copy(
+                        countdownLast5BreakEnabled = enabled,
+                    ),
+                ),
+            )
+        }
+
         private fun openEditor() {
             dispatch(Msg.SetDraftSettings(state().appliedSettings))
             dispatch(Msg.SetShowEditor(true))
@@ -244,8 +341,63 @@ internal class TimerStoreFactory(
             if (state().isRunning) {
                 stopAndReset()
             }
+            TimerServiceController.restart(applied)
             dispatch(Msg.SetShowEditor(false))
+            persistSnapshot(
+                idleTimerWidgetSnapshot(
+                    totalDurationSeconds = applied.totalDurationSeconds,
+                    breakDurationSeconds = applied.breakDurationSeconds,
+                ),
+            )
             scope.launch { repository.saveTimerSettings(applied) }
+        }
+
+        private fun dismissNotificationPermissionSheet() {
+            dispatch(Msg.SetShowNotificationPermissionSheet(false))
+            if (!state().appliedSettings.notificationPermissionPromptShown) {
+                persistNotificationPermissionPromptShown()
+            }
+        }
+
+        private fun requestNotificationPermission() {
+            dispatch(Msg.SetRequestNotificationPermission(true))
+        }
+
+        private fun onNotificationPermissionResult(granted: Boolean) {
+            dispatch(Msg.SetRequestNotificationPermission(false))
+            dispatch(Msg.SetShowNotificationPermissionSheet(false))
+            if (!state().appliedSettings.notificationPermissionPromptShown) {
+                persistNotificationPermissionPromptShown()
+            }
+            if (granted) {
+                dispatch(Msg.SetSnackbarMessage(message = "Notifications enabled", actionLabel = null))
+            }
+        }
+
+        private fun persistNotificationPermissionPromptShown() {
+            val updated = state().appliedSettings.copy(notificationPermissionPromptShown = true)
+            dispatch(Msg.SetAppliedSettings(updated))
+            scope.launch { repository.saveTimerSettings(updated) }
+        }
+
+        private fun applySnapshot(snapshot: TimerWidgetSnapshot, settings: TimerSettings) {
+            val visuals = snapshot.resolveVisuals(nowEpochMillis())
+            val phase = visuals.phase.toStorePhase()
+            dispatch(
+                Msg.SetTimerVisuals(
+                    elapsedMillis = elapsedFromVisuals(visuals.remainingSeconds, visuals.phase),
+                    progress = visuals.progress,
+                    phase = phase,
+                ),
+            )
+            dispatch(Msg.SetRunning(visuals.isRunning))
+            if (visuals.isRunning && TimerServiceController.isServiceBackedRuntimeEnabled()) {
+                startMirrorTicker()
+            }
+        }
+
+        private fun persistSnapshot(snapshot: TimerWidgetSnapshot) {
+            scope.launch { snapshotRepository.saveSnapshot(snapshot) }
         }
 
         private fun normalizeSettings(settings: TimerSettings): TimerSettings {
@@ -257,13 +409,23 @@ internal class TimerStoreFactory(
             )
         }
 
-        private fun currentPhaseDurationSeconds(
-            state: TimerStore.State,
-            phase: TimerStore.TimerPhase,
-        ): Int = when (phase) {
-            TimerStore.TimerPhase.Active -> state.appliedSettings.totalDurationSeconds
-            TimerStore.TimerPhase.Break -> state.appliedSettings.breakDurationSeconds
+        private fun runtimeConfig(settings: TimerSettings): RuntimeConfig = RuntimeConfig(
+            totalDurationSeconds = settings.totalDurationSeconds,
+            breakDurationSeconds = settings.breakDurationSeconds,
+            enabledIntervals = settings.enabledIntervals,
+            countdownLast5TimerEnabled = settings.countdownLast5TimerEnabled,
+            countdownLast5BreakEnabled = settings.countdownLast5BreakEnabled,
+        )
+
+        private fun elapsedFromVisuals(remainingSeconds: Int, phase: TimerPhase): Long {
+            val duration = when (phase) {
+                TimerPhase.Active -> state().appliedSettings.totalDurationSeconds
+                TimerPhase.Break -> state().appliedSettings.breakDurationSeconds
+            }
+            return ((duration - remainingSeconds).coerceAtLeast(0) * 1000L)
         }
+
+        private fun nowEpochMillis(): Long = currentEpochMillis()
     }
 
     private object ReducerImpl : Reducer<TimerStore.State, Msg> {
@@ -277,8 +439,29 @@ internal class TimerStoreFactory(
                     progress = msg.progress,
                     phase = msg.phase,
                 )
-
                 is Msg.SetShowEditor -> copy(showEditor = msg.value)
+                is Msg.SetSnackbarMessage -> copy(
+                    snackbarMessage = msg.message,
+                    snackbarActionLabel = msg.actionLabel,
+                )
+
+                is Msg.SetShowNotificationPermissionSheet -> copy(showNotificationPermissionSheet = msg.value)
+                is Msg.SetRequestNotificationPermission -> copy(requestNotificationPermission = msg.value)
             }
     }
+}
+
+private fun RuntimePhase.toStorePhase(): TimerStore.TimerPhase = when (this) {
+    RuntimePhase.Active -> TimerStore.TimerPhase.Active
+    RuntimePhase.Break -> TimerStore.TimerPhase.Break
+}
+
+private fun RuntimePhase.toDomainPhase(): TimerPhase = when (this) {
+    RuntimePhase.Active -> TimerPhase.Active
+    RuntimePhase.Break -> TimerPhase.Break
+}
+
+private fun TimerPhase.toStorePhase(): TimerStore.TimerPhase = when (this) {
+    TimerPhase.Active -> TimerStore.TimerPhase.Active
+    TimerPhase.Break -> TimerStore.TimerPhase.Break
 }

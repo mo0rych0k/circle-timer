@@ -5,6 +5,7 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.circle.timer.common.core.di.ComponentFactory
 import com.circle.timer.features.timer.domain.TimerAudioPlayer
 import com.circle.timer.features.timer.domain.TimerSettingsRepository
+import com.circle.timer.features.timer.domain.TimerWidgetSnapshotRepository
 import com.circle.timer.features.timer.ui.DefaultTimerComponent
 import com.circle.timer.features.timer.ui.TimerComponent
 import com.circle.timer.features.timer.ui.store.TimerStore
@@ -19,6 +20,7 @@ internal fun ComponentFactory.createTimerStore(): TimerStore {
     return TimerStoreFactory(
         storeFactory = get<StoreFactory>(),
         repository = get<TimerSettingsRepository>(),
+        snapshotRepository = get<TimerWidgetSnapshotRepository>(),
         audioPlayer = get<TimerAudioPlayer>(),
     ).create()
 }

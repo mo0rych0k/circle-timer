@@ -19,6 +19,11 @@ internal class CoalescingTimerAudioPlayer(
         delegate.playCycleComplete()
     }
 
+    override fun playCountdown(isBreak: Boolean, secondsRemaining: Int) {
+        delegate.stop()
+        delegate.playCountdown(isBreak = isBreak, secondsRemaining = secondsRemaining)
+    }
+
     override fun stop() {
         delegate.stop()
     }

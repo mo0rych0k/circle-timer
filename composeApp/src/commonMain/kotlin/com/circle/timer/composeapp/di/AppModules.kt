@@ -9,6 +9,7 @@ import com.circle.timer.features.onboarding.ui.di.onboardingUiModule
 import com.circle.timer.features.timer.data.di.timerDataModule
 import com.circle.timer.features.timer.domain.di.timerDomainModule
 import com.circle.timer.features.timer.ui.di.timerUiModule
+import com.circle.timer.utils.logging.impl.di.loggingModule
 import org.koin.core.module.Module
 
 internal val appModules: List<Module> = listOf(
@@ -19,6 +20,7 @@ internal val appModules: List<Module> = listOf(
     persistenceDatabaseModule,
     persistenceDatabasePlatformModule,
 
+    loggingModule,
     onboardingUiModule,
     timerDataModule,
     timerDomainModule,

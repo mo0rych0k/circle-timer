@@ -27,9 +27,16 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -42,6 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.circle.timer.features.timer.domain.allowedIntervalsForDuration
+import com.circle.timer.features.timer.domain.formatTimerCountdown
+import com.circle.timer.features.timer.domain.notchStyleForSecond
 import com.circle.timer.features.timer.ui.store.TimerStore
 import kotlin.math.PI
 import kotlin.math.cos
@@ -53,6 +62,26 @@ public fun TimerScreen(
     modifier: Modifier = Modifier,
 ) {
     val state = component.state.subscribeAsState().value
+    val snackbarHostState = remember { SnackbarHostState() }
+    NotificationPermissionRequester(
+        requestPermission = state.requestNotificationPermission,
+        onPermissionResult = { granted ->
+            component.onIntent(TimerStore.Intent.NotificationPermissionRequestResult(granted))
+        },
+    )
+
+    LaunchedEffect(state.snackbarMessage, state.snackbarActionLabel) {
+        val message = state.snackbarMessage ?: return@LaunchedEffect
+        val result = snackbarHostState.showSnackbar(
+            message = message,
+            actionLabel = state.snackbarActionLabel,
+            duration = SnackbarDuration.Long,
+        )
+        if (result == SnackbarResult.ActionPerformed) {
+            component.onIntent(TimerStore.Intent.RequestNotificationPermission)
+        }
+        component.onIntent(TimerStore.Intent.ConsumeSnackbar)
+    }
 
     Box(
         modifier = modifier
@@ -115,6 +144,12 @@ public fun TimerScreen(
                 modifier = Modifier.size(42.dp),
             )
         }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 88.dp),
+        )
     }
 
     if (state.showEditor) {
@@ -124,8 +159,56 @@ public fun TimerScreen(
             onDurationChange = { component.onIntent(TimerStore.Intent.UpdateDuration(it)) },
             onToggleInterval = { component.onIntent(TimerStore.Intent.ToggleInterval(it)) },
             onBreakDurationChange = { component.onIntent(TimerStore.Intent.UpdateBreakDuration(it)) },
+            onCountdownLast5TimerChange = {
+                component.onIntent(TimerStore.Intent.SetCountdownLast5TimerEnabled(it))
+            },
+            onCountdownLast5BreakChange = {
+                component.onIntent(TimerStore.Intent.SetCountdownLast5BreakEnabled(it))
+            },
             onSave = { component.onIntent(TimerStore.Intent.SaveSettings) },
         )
+    }
+    if (state.showNotificationPermissionSheet) {
+        NotificationPermissionSheet(
+            onDismiss = { component.onIntent(TimerStore.Intent.DismissNotificationPermissionSheet) },
+            onRequestPermission = { component.onIntent(TimerStore.Intent.RequestNotificationPermission) },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotificationPermissionSheet(
+    onDismiss: () -> Unit,
+    onRequestPermission: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Allow notifications",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = "Circle Timer uses notifications to keep the timer visible and reliable when the app is in background.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Button(
+                onClick = onRequestPermission,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Request permission")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 
@@ -208,15 +291,7 @@ private fun intervalColor(intervalSeconds: Int): Color = when (intervalSeconds) 
     else -> Color(0xFF26A69A)
 }
 
-private enum class NotchStyle { TickSmall, TickMedium, TickLarge, Triangle, Square }
-
-private fun notchStyleForSecond(second: Int): NotchStyle {
-    if (second % 30 == 0) return NotchStyle.Square
-    if (second % 15 == 0) return NotchStyle.Triangle
-    if (second % 10 == 0) return NotchStyle.TickLarge
-    if (second % 5 == 0) return NotchStyle.TickMedium
-    return NotchStyle.TickSmall
-}
+private typealias NotchStyle = com.circle.timer.features.timer.domain.DialNotchStyle
 
 private fun notchColorForSecond(
     second: Int,
@@ -296,6 +371,8 @@ private fun SettingsSheet(
     onDurationChange: (Int) -> Unit,
     onToggleInterval: (Int) -> Unit,
     onBreakDurationChange: (Int) -> Unit,
+    onCountdownLast5TimerChange: (Boolean) -> Unit,
+    onCountdownLast5BreakChange: (Boolean) -> Unit,
     onSave: () -> Unit,
 ) {
     val availableIntervals = allowedIntervalsForDuration(state.draftSettings.totalDurationSeconds)
@@ -350,6 +427,16 @@ private fun SettingsSheet(
                         )
                     }
                 }
+                RowToggle(
+                    label = "Countdown: Last 5s of Timer",
+                    checked = state.draftSettings.countdownLast5TimerEnabled,
+                    onCheckedChange = onCountdownLast5TimerChange,
+                )
+                RowToggle(
+                    label = "Countdown: Last 5s of Break",
+                    checked = state.draftSettings.countdownLast5BreakEnabled,
+                    onCheckedChange = onCountdownLast5BreakChange,
+                )
                 Text("Break Duration", style = MaterialTheme.typography.titleMedium)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -379,18 +466,40 @@ private fun SettingsSheet(
     }
 }
 
+@Composable
+private fun RowToggle(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    androidx.compose.foundation.layout.Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
 private fun displayCountdown(
     elapsedMillis: Long,
     totalDurationSeconds: Int,
     breakDurationSeconds: Int,
     isRunning: Boolean,
     phase: TimerStore.TimerPhase,
-): String {
-    val phaseDuration = when (phase) {
-        TimerStore.TimerPhase.Active -> totalDurationSeconds
-        TimerStore.TimerPhase.Break -> breakDurationSeconds
-    }.coerceAtLeast(0)
-    if (!isRunning) return totalDurationSeconds.toString()
-    val elapsedSeconds = (elapsedMillis / 1000L).toInt()
-    return (phaseDuration - elapsedSeconds).coerceAtLeast(0).toString()
+): String = formatTimerCountdown(
+    elapsedMillis = elapsedMillis,
+    totalDurationSeconds = totalDurationSeconds,
+    breakDurationSeconds = breakDurationSeconds,
+    isRunning = isRunning,
+    phase = phase.toDomainPhase(),
+)
+
+private fun TimerStore.TimerPhase.toDomainPhase(): com.circle.timer.features.timer.domain.TimerPhase = when (this) {
+    TimerStore.TimerPhase.Active -> com.circle.timer.features.timer.domain.TimerPhase.Active
+    TimerStore.TimerPhase.Break -> com.circle.timer.features.timer.domain.TimerPhase.Break
 }

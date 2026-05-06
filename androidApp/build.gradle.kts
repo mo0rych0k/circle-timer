@@ -46,6 +46,9 @@ dependencies {
     implementation(projects.common.coreDi)
     implementation(projects.common.uikit)
     implementation(projects.common.coreNavigation)
+    implementation(projects.features.timer.timerDomain)
+    implementation(projects.features.timer.timerData)
     implementation(libs.koin.android)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.glance.appwidget)
 }

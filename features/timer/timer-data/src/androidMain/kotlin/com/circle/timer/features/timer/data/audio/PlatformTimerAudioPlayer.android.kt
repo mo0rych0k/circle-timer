@@ -17,6 +17,17 @@ internal actual class PlatformTimerAudioPlayer actual constructor() :
         toneGenerator.startTone(tone, if (intervalSeconds == 1) 90 else 150)
     }
 
+    actual override fun playCountdown(isBreak: Boolean, secondsRemaining: Int) {
+        toneGenerator.stopTone()
+        val tone = if (isBreak) {
+            ToneGenerator.TONE_DTMF_7
+        } else {
+            ToneGenerator.TONE_DTMF_3
+        }
+        val duration = 110 + ((5 - secondsRemaining.coerceIn(1, 5)) * 10)
+        toneGenerator.startTone(tone, duration)
+    }
+
     actual override fun playCycleComplete() {
         toneGenerator.stopTone()
         toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 220)

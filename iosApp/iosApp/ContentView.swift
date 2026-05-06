@@ -15,6 +15,10 @@ struct ContentView: View {
     var body: some View {
         ComposeView()
             .ignoresSafeArea(.all)
+            .onOpenURL { _ in
+                // Widget opens the app with circletimer://timer.
+                // Compose root is already the timer entry point.
+            }
     }
 }
 
