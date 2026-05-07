@@ -21,22 +21,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -51,6 +52,7 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.circle.timer.features.timer.domain.allowedIntervalsForDuration
 import com.circle.timer.features.timer.domain.formatTimerCountdown
 import com.circle.timer.features.timer.domain.notchStyleForSecond
+import com.circle.timer.features.timer.ui.store.TimerServiceController
 import com.circle.timer.features.timer.ui.store.TimerStore
 import kotlin.math.PI
 import kotlin.math.cos
@@ -62,26 +64,19 @@ public fun TimerScreen(
     modifier: Modifier = Modifier,
 ) {
     val state = component.state.subscribeAsState().value
-    val snackbarHostState = remember { SnackbarHostState() }
+    val openNotificationSettings = rememberOpenNotificationSettings()
+    var hasNotificationPermission by remember { mutableStateOf(TimerServiceController.hasNotificationPermission()) }
+    ScreenResumeEffect {
+        hasNotificationPermission = TimerServiceController.hasNotificationPermission()
+    }
+    val shouldShowNotificationStatus = TimerServiceController.isServiceBackedRuntimeEnabled() &&
+        !hasNotificationPermission
     NotificationPermissionRequester(
         requestPermission = state.requestNotificationPermission,
         onPermissionResult = { granted ->
             component.onIntent(TimerStore.Intent.NotificationPermissionRequestResult(granted))
         },
     )
-
-    LaunchedEffect(state.snackbarMessage, state.snackbarActionLabel) {
-        val message = state.snackbarMessage ?: return@LaunchedEffect
-        val result = snackbarHostState.showSnackbar(
-            message = message,
-            actionLabel = state.snackbarActionLabel,
-            duration = SnackbarDuration.Long,
-        )
-        if (result == SnackbarResult.ActionPerformed) {
-            component.onIntent(TimerStore.Intent.RequestNotificationPermission)
-        }
-        component.onIntent(TimerStore.Intent.ConsumeSnackbar)
-    }
 
     Box(
         modifier = modifier
@@ -144,12 +139,25 @@ public fun TimerScreen(
                 modifier = Modifier.size(42.dp),
             )
         }
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 88.dp),
-        )
+        if (shouldShowNotificationStatus) {
+            IconButton(
+                onClick = openNotificationSettings,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "Notification permission required for background timer",
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(state.snackbarMessage, state.snackbarActionLabel) {
+        if (state.snackbarMessage == null) return@LaunchedEffect
+        component.onIntent(TimerStore.Intent.ConsumeSnackbar)
     }
 
     if (state.showEditor) {
@@ -432,11 +440,6 @@ private fun SettingsSheet(
                     checked = state.draftSettings.countdownLast5TimerEnabled,
                     onCheckedChange = onCountdownLast5TimerChange,
                 )
-                RowToggle(
-                    label = "Countdown: Last 5s of Break",
-                    checked = state.draftSettings.countdownLast5BreakEnabled,
-                    onCheckedChange = onCountdownLast5BreakChange,
-                )
                 Text("Break Duration", style = MaterialTheme.typography.titleMedium)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -451,6 +454,11 @@ private fun SettingsSheet(
                         )
                     }
                 }
+                RowToggle(
+                    label = "Countdown: Last 5s of Break",
+                    checked = state.draftSettings.countdownLast5BreakEnabled,
+                    onCheckedChange = onCountdownLast5BreakChange,
+                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
             Button(
