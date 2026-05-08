@@ -9,8 +9,8 @@ public data class RuntimeConfig(
     val totalDurationSeconds: Int,
     val breakDurationSeconds: Int,
     val enabledIntervals: Set<Int>,
-    val countdownLast5TimerEnabled: Boolean,
-    val countdownLast5BreakEnabled: Boolean,
+    val countdownLast3TimerEnabled: Boolean,
+    val countdownLast3BreakEnabled: Boolean,
 )
 
 public data class RuntimeState(
@@ -114,9 +114,9 @@ public class TimerRuntimeEngine(
             elapsedMillis = nextElapsed,
             durationMillis = durationMillis,
             enabledIntervals = if (state.phase == RuntimePhase.Active) config.enabledIntervals else emptySet(),
-            countdownLast5Enabled = when (state.phase) {
-                RuntimePhase.Active -> config.countdownLast5TimerEnabled
-                RuntimePhase.Break -> config.countdownLast5BreakEnabled
+            countdownLast3Enabled = when (state.phase) {
+                RuntimePhase.Active -> config.countdownLast3TimerEnabled
+                RuntimePhase.Break -> config.countdownLast3BreakEnabled
             },
         )
         return RuntimeStepResult(state = state, cue = cue)
@@ -134,7 +134,7 @@ private fun cueForBoundaryCross(
     elapsedMillis: Long,
     durationMillis: Long,
     enabledIntervals: Set<Int>,
-    countdownLast5Enabled: Boolean,
+    countdownLast3Enabled: Boolean,
 ): RuntimeCue? {
     val prevSec = previousMillis.floorSeconds()
     val nowSec = elapsedMillis.floorSeconds()
@@ -147,7 +147,7 @@ private fun cueForBoundaryCross(
         if (boundaryMillis >= durationMillis) break
         val remaining = ((durationMillis - boundaryMillis) / 1000L).toInt()
         val cue = when {
-            countdownLast5Enabled && remaining in 1..5 ->
+            countdownLast3Enabled && remaining in 1..3 ->
                 RuntimeCue.CountdownTick(phase = phase, secondsRemaining = remaining)
 
             enabledIntervals.any { interval -> interval > 0 && sec % interval == 0L } -> {

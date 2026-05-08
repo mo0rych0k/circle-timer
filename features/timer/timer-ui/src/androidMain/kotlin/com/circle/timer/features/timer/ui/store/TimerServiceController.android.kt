@@ -22,11 +22,11 @@ internal actual object TimerServiceController {
                 )
                 putExtra(
                     TimerForegroundService.EXTRA_COUNTDOWN_ACTIVE_ENABLED,
-                    settings.countdownLast5TimerEnabled,
+                    settings.countdownLast3TimerEnabled,
                 )
                 putExtra(
                     TimerForegroundService.EXTRA_COUNTDOWN_BREAK_ENABLED,
-                    settings.countdownLast5BreakEnabled,
+                    settings.countdownLast3BreakEnabled,
                 )
             },
         )

@@ -29,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -110,13 +109,18 @@ public fun TimerScreen(
                             breakDurationSeconds = state.appliedSettings.breakDurationSeconds,
                             isRunning = state.isRunning,
                             phase = state.phase,
+                            preStartCountdownSeconds = state.preStartCountdownSeconds,
                         ),
                         style = MaterialTheme.typography.headlineMedium,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Icon(
-                        imageVector = if (state.isRunning) Icons.Default.Stop else Icons.Default.PlayArrow,
+                        imageVector = if (state.isRunning || state.preStartCountdownSeconds != null) {
+                            Icons.Default.Stop
+                        } else {
+                            Icons.Default.PlayArrow
+                        },
                         contentDescription = null,
                         modifier = Modifier.size(72.dp),
                         tint = MaterialTheme.colorScheme.primary,
@@ -167,12 +171,6 @@ public fun TimerScreen(
             onDurationChange = { component.onIntent(TimerStore.Intent.UpdateDuration(it)) },
             onToggleInterval = { component.onIntent(TimerStore.Intent.ToggleInterval(it)) },
             onBreakDurationChange = { component.onIntent(TimerStore.Intent.UpdateBreakDuration(it)) },
-            onCountdownLast5TimerChange = {
-                component.onIntent(TimerStore.Intent.SetCountdownLast5TimerEnabled(it))
-            },
-            onCountdownLast5BreakChange = {
-                component.onIntent(TimerStore.Intent.SetCountdownLast5BreakEnabled(it))
-            },
             onSave = { component.onIntent(TimerStore.Intent.SaveSettings) },
         )
     }
@@ -379,8 +377,6 @@ private fun SettingsSheet(
     onDurationChange: (Int) -> Unit,
     onToggleInterval: (Int) -> Unit,
     onBreakDurationChange: (Int) -> Unit,
-    onCountdownLast5TimerChange: (Boolean) -> Unit,
-    onCountdownLast5BreakChange: (Boolean) -> Unit,
     onSave: () -> Unit,
 ) {
     val availableIntervals = allowedIntervalsForDuration(state.draftSettings.totalDurationSeconds)
@@ -435,11 +431,6 @@ private fun SettingsSheet(
                         )
                     }
                 }
-                RowToggle(
-                    label = "Countdown: Last 5s of Timer",
-                    checked = state.draftSettings.countdownLast5TimerEnabled,
-                    onCheckedChange = onCountdownLast5TimerChange,
-                )
                 Text("Break Duration", style = MaterialTheme.typography.titleMedium)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -454,11 +445,6 @@ private fun SettingsSheet(
                         )
                     }
                 }
-                RowToggle(
-                    label = "Countdown: Last 5s of Break",
-                    checked = state.draftSettings.countdownLast5BreakEnabled,
-                    onCheckedChange = onCountdownLast5BreakChange,
-                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
             Button(
@@ -474,38 +460,22 @@ private fun SettingsSheet(
     }
 }
 
-@Composable
-private fun RowToggle(
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    androidx.compose.foundation.layout.Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyLarge)
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-        )
-    }
-}
-
 private fun displayCountdown(
     elapsedMillis: Long,
     totalDurationSeconds: Int,
     breakDurationSeconds: Int,
     isRunning: Boolean,
     phase: TimerStore.TimerPhase,
+    preStartCountdownSeconds: Int?,
 ): String = formatTimerCountdown(
     elapsedMillis = elapsedMillis,
     totalDurationSeconds = totalDurationSeconds,
     breakDurationSeconds = breakDurationSeconds,
     isRunning = isRunning,
     phase = phase.toDomainPhase(),
-)
+).let { default ->
+    preStartCountdownSeconds?.toString() ?: default
+}
 
 private fun TimerStore.TimerPhase.toDomainPhase(): com.circle.timer.features.timer.domain.TimerPhase = when (this) {
     TimerStore.TimerPhase.Active -> com.circle.timer.features.timer.domain.TimerPhase.Active

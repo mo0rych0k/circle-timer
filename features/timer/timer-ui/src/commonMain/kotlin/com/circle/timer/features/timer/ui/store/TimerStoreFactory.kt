@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val TICK_MILLIS = 120L
+private const val PRE_START_COUNTDOWN_SECONDS = 3
 
 internal class TimerStoreFactory(
     private val storeFactory: StoreFactory,
@@ -53,6 +54,7 @@ internal class TimerStoreFactory(
         data class SetAppliedSettings(val settings: TimerSettings) : Msg
         data class SetDraftSettings(val settings: TimerSettings) : Msg
         data class SetRunning(val value: Boolean) : Msg
+        data class SetPreStartCountdownSeconds(val value: Int?) : Msg
         data class SetTimerVisuals(
             val elapsedMillis: Long,
             val progress: Float,
@@ -77,6 +79,7 @@ internal class TimerStoreFactory(
     private inner class ExecutorImpl : CoroutineExecutor<TimerStore.Intent, Action, TimerStore.State, Msg, Nothing>() {
         private var runtimeJob: Job? = null
         private var mirrorJob: Job? = null
+        private var preStartCountdownJob: Job? = null
         private var runtimeEngine: TimerRuntimeEngine? = null
         private var phaseStartedEpochMillis: Long = 0L
 
@@ -100,8 +103,8 @@ internal class TimerStoreFactory(
                 is TimerStore.Intent.UpdateDuration -> updateDuration(intent.seconds)
                 is TimerStore.Intent.ToggleInterval -> toggleInterval(intent.seconds)
                 is TimerStore.Intent.UpdateBreakDuration -> updateBreakDuration(intent.seconds)
-                is TimerStore.Intent.SetCountdownLast5TimerEnabled -> updateCountdownTimerEnabled(intent.enabled)
-                is TimerStore.Intent.SetCountdownLast5BreakEnabled -> updateCountdownBreakEnabled(intent.enabled)
+                is TimerStore.Intent.SetCountdownLast3TimerEnabled -> updateCountdownTimerEnabled(intent.enabled)
+                is TimerStore.Intent.SetCountdownLast3BreakEnabled -> updateCountdownBreakEnabled(intent.enabled)
                 TimerStore.Intent.DismissNotificationPermissionSheet -> dismissNotificationPermissionSheet()
                 TimerStore.Intent.RequestNotificationPermission -> requestNotificationPermission()
                 is TimerStore.Intent.NotificationPermissionRequestResult -> onNotificationPermissionResult(intent.granted)
@@ -116,11 +119,10 @@ internal class TimerStoreFactory(
         }
 
         private fun onToggleRun() {
-            if (state().isRunning) {
+            if (state().isRunning || state().preStartCountdownSeconds != null) {
                 stopAndReset()
                 return
             }
-            val now = nowEpochMillis()
             val settings = state().appliedSettings
             val missingNotificationPermission =
                 TimerServiceController.isServiceBackedRuntimeEnabled() && !TimerServiceController.hasNotificationPermission()
@@ -136,6 +138,26 @@ internal class TimerStoreFactory(
                     ),
                 )
             }
+            dispatch(Msg.SetRunning(true))
+            dispatch(Msg.SetShowNotificationPermissionSheet(false))
+            startPreStartCountdown(settings)
+        }
+
+        private fun startPreStartCountdown(settings: TimerSettings) {
+            preStartCountdownJob?.cancel()
+            preStartCountdownJob = scope.launch {
+                for (seconds in PRE_START_COUNTDOWN_SECONDS downTo 1) {
+                    dispatch(Msg.SetPreStartCountdownSeconds(seconds))
+                    audioPlayer.playCountdown(isBreak = false, secondsRemaining = seconds)
+                    delay(1000L)
+                }
+                dispatch(Msg.SetPreStartCountdownSeconds(null))
+                startRuntime(settings)
+            }
+        }
+
+        private fun startRuntime(settings: TimerSettings) {
+            val now = nowEpochMillis()
             phaseStartedEpochMillis = now
             runtimeEngine = TimerRuntimeEngine(runtimeConfig(settings)).also { it.start(now) }
             dispatch(
@@ -145,8 +167,6 @@ internal class TimerStoreFactory(
                     phase = TimerStore.TimerPhase.Active,
                 ),
             )
-            dispatch(Msg.SetRunning(true))
-            dispatch(Msg.SetShowNotificationPermissionSheet(false))
             persistSnapshot(
                 TimerWidgetSnapshot(
                     isRunning = true,
@@ -236,6 +256,8 @@ internal class TimerStoreFactory(
         }
 
         private fun stopAndReset() {
+            preStartCountdownJob?.cancel()
+            preStartCountdownJob = null
             runtimeJob?.cancel()
             runtimeJob = null
             mirrorJob?.cancel()
@@ -244,6 +266,7 @@ internal class TimerStoreFactory(
             TimerServiceController.stop()
             audioPlayer.stop()
             dispatch(Msg.SetRunning(false))
+            dispatch(Msg.SetPreStartCountdownSeconds(null))
             dispatch(
                 Msg.SetTimerVisuals(
                     elapsedMillis = 0L,
@@ -308,7 +331,7 @@ internal class TimerStoreFactory(
             dispatch(
                 Msg.SetDraftSettings(
                     state().draftSettings.copy(
-                        countdownLast5TimerEnabled = enabled,
+                        countdownLast3TimerEnabled = enabled,
                     ),
                 ),
             )
@@ -318,7 +341,7 @@ internal class TimerStoreFactory(
             dispatch(
                 Msg.SetDraftSettings(
                     state().draftSettings.copy(
-                        countdownLast5BreakEnabled = enabled,
+                        countdownLast3BreakEnabled = enabled,
                     ),
                 ),
             )
@@ -406,6 +429,8 @@ internal class TimerStoreFactory(
                 totalDurationSeconds = safeDuration,
                 enabledIntervals = normalizeIntervals(safeDuration, settings.enabledIntervals),
                 breakDurationSeconds = normalizeBreakDuration(settings.breakDurationSeconds),
+                countdownLast3TimerEnabled = true,
+                countdownLast3BreakEnabled = true,
             )
         }
 
@@ -413,8 +438,8 @@ internal class TimerStoreFactory(
             totalDurationSeconds = settings.totalDurationSeconds,
             breakDurationSeconds = settings.breakDurationSeconds,
             enabledIntervals = settings.enabledIntervals,
-            countdownLast5TimerEnabled = settings.countdownLast5TimerEnabled,
-            countdownLast5BreakEnabled = settings.countdownLast5BreakEnabled,
+            countdownLast3TimerEnabled = true,
+            countdownLast3BreakEnabled = true,
         )
 
         private fun elapsedFromVisuals(remainingSeconds: Int, phase: TimerPhase): Long {
@@ -434,6 +459,7 @@ internal class TimerStoreFactory(
                 is Msg.SetAppliedSettings -> copy(appliedSettings = msg.settings)
                 is Msg.SetDraftSettings -> copy(draftSettings = msg.settings)
                 is Msg.SetRunning -> copy(isRunning = msg.value)
+                is Msg.SetPreStartCountdownSeconds -> copy(preStartCountdownSeconds = msg.value)
                 is Msg.SetTimerVisuals -> copy(
                     elapsedMillis = msg.elapsedMillis,
                     progress = msg.progress,

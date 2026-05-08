@@ -24,7 +24,7 @@ internal actual class PlatformTimerAudioPlayer actual constructor() :
         } else {
             ToneGenerator.TONE_DTMF_3
         }
-        val duration = 110 + ((5 - secondsRemaining.coerceIn(1, 5)) * 10)
+        val duration = 110 + ((3 - secondsRemaining.coerceIn(1, 3)) * 10)
         toneGenerator.startTone(tone, duration)
     }
 

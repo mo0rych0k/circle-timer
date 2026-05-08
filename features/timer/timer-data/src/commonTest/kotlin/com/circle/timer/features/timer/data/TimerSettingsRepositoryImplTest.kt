@@ -18,8 +18,8 @@ class TimerSettingsRepositoryImplTest {
                 totalDurationSeconds = 30,
                 enabledIntervals = setOf(5, 10),
                 breakDurationSeconds = 15,
-                countdownLast5TimerEnabled = false,
-                countdownLast5BreakEnabled = true,
+                countdownLast3TimerEnabled = false,
+                countdownLast3BreakEnabled = true,
                 notificationPermissionPromptShown = true,
             ),
         )
@@ -28,8 +28,8 @@ class TimerSettingsRepositoryImplTest {
         assertEquals(30, loaded.totalDurationSeconds)
         assertEquals(setOf(5, 10), loaded.enabledIntervals)
         assertEquals(15, loaded.breakDurationSeconds)
-        assertEquals(false, loaded.countdownLast5TimerEnabled)
-        assertEquals(true, loaded.countdownLast5BreakEnabled)
+        assertEquals(false, loaded.countdownLast3TimerEnabled)
+        assertEquals(true, loaded.countdownLast3BreakEnabled)
         assertEquals(true, loaded.notificationPermissionPromptShown)
     }
 
@@ -45,8 +45,8 @@ class TimerSettingsRepositoryImplTest {
 
         val loaded = repository.getTimerSettings()
         assertEquals(0, loaded.breakDurationSeconds)
-        assertEquals(true, loaded.countdownLast5TimerEnabled)
-        assertEquals(true, loaded.countdownLast5BreakEnabled)
+        assertEquals(true, loaded.countdownLast3TimerEnabled)
+        assertEquals(true, loaded.countdownLast3BreakEnabled)
         assertEquals(false, loaded.notificationPermissionPromptShown)
     }
 }

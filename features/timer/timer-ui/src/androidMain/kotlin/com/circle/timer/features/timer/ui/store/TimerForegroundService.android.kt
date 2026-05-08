@@ -89,8 +89,8 @@ internal class TimerForegroundService : Service() {
             totalDurationSeconds = settings.totalDurationSeconds,
             breakDurationSeconds = settings.breakDurationSeconds,
             enabledIntervals = settings.enabledIntervals,
-            countdownLast5TimerEnabled = settings.countdownLast5TimerEnabled,
-            countdownLast5BreakEnabled = settings.countdownLast5BreakEnabled,
+            countdownLast3TimerEnabled = settings.countdownLast3TimerEnabled,
+            countdownLast3BreakEnabled = settings.countdownLast3BreakEnabled,
         )
         val engine = TimerRuntimeEngine(config = config)
         val started = engine.start(System.currentTimeMillis())
@@ -234,8 +234,8 @@ internal class TimerForegroundService : Service() {
         totalDurationSeconds = intent.getIntExtra(EXTRA_TOTAL_DURATION, 60),
         breakDurationSeconds = intent.getIntExtra(EXTRA_BREAK_DURATION, 0),
         enabledIntervals = intent.getIntArrayExtra(EXTRA_INTERVALS)?.toSet() ?: emptySet(),
-        countdownLast5TimerEnabled = intent.getBooleanExtra(EXTRA_COUNTDOWN_ACTIVE_ENABLED, true),
-        countdownLast5BreakEnabled = intent.getBooleanExtra(EXTRA_COUNTDOWN_BREAK_ENABLED, true),
+        countdownLast3TimerEnabled = intent.getBooleanExtra(EXTRA_COUNTDOWN_ACTIVE_ENABLED, true),
+        countdownLast3BreakEnabled = intent.getBooleanExtra(EXTRA_COUNTDOWN_BREAK_ENABLED, true),
     )
 
     private fun durationForPhase(phase: RuntimePhase, settings: TimerSettings): Int = when (phase) {

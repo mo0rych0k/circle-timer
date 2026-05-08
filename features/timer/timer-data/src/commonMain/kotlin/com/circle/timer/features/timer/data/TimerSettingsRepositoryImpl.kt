@@ -23,8 +23,8 @@ internal class TimerSettingsRepositoryImpl(
             totalDurationSeconds = duration,
             enabledIntervals = normalizeIntervals(duration, parsed),
             breakDurationSeconds = breakDuration,
-            countdownLast5TimerEnabled = settings.getBoolean(COUNTDOWN_LAST5_TIMER_KEY, true),
-            countdownLast5BreakEnabled = settings.getBoolean(COUNTDOWN_LAST5_BREAK_KEY, true),
+            countdownLast3TimerEnabled = settings.getBoolean(COUNTDOWN_LAST3_TIMER_KEY, true),
+            countdownLast3BreakEnabled = settings.getBoolean(COUNTDOWN_LAST3_BREAK_KEY, true),
             notificationPermissionPromptShown = settings.getBoolean(NOTIFICATION_PROMPT_SHOWN_KEY, false),
         )
     }
@@ -36,8 +36,8 @@ internal class TimerSettingsRepositoryImpl(
         this.settings.putInt(TOTAL_DURATION_KEY, safeDuration)
         this.settings.putString(INTERVALS_KEY, safeIntervals.sorted().joinToString(","))
         this.settings.putInt(BREAK_DURATION_KEY, safeBreakDuration)
-        this.settings.putBoolean(COUNTDOWN_LAST5_TIMER_KEY, settings.countdownLast5TimerEnabled)
-        this.settings.putBoolean(COUNTDOWN_LAST5_BREAK_KEY, settings.countdownLast5BreakEnabled)
+        this.settings.putBoolean(COUNTDOWN_LAST3_TIMER_KEY, settings.countdownLast3TimerEnabled)
+        this.settings.putBoolean(COUNTDOWN_LAST3_BREAK_KEY, settings.countdownLast3BreakEnabled)
         this.settings.putBoolean(NOTIFICATION_PROMPT_SHOWN_KEY, settings.notificationPermissionPromptShown)
     }
 
@@ -53,8 +53,8 @@ internal class TimerSettingsRepositoryImpl(
         private const val TOTAL_DURATION_KEY = "timer.totalDurationSeconds"
         private const val INTERVALS_KEY = "timer.enabledIntervals"
         private const val BREAK_DURATION_KEY = "timer.breakDurationSeconds"
-        private const val COUNTDOWN_LAST5_TIMER_KEY = "timer.countdown.last5.timer"
-        private const val COUNTDOWN_LAST5_BREAK_KEY = "timer.countdown.last5.break"
+        private const val COUNTDOWN_LAST3_TIMER_KEY = "timer.countdown.last3.timer"
+        private const val COUNTDOWN_LAST3_BREAK_KEY = "timer.countdown.last3.break"
         private const val NOTIFICATION_PROMPT_SHOWN_KEY = "timer.notification.promptShown"
         private const val ONBOARDING_KEY = "onboarding.completed"
     }

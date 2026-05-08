@@ -13,8 +13,8 @@ class TimerRuntimeEngineTest {
                 totalDurationSeconds = 10,
                 breakDurationSeconds = 0,
                 enabledIntervals = setOf(1),
-                countdownLast5TimerEnabled = false,
-                countdownLast5BreakEnabled = false,
+                countdownLast3TimerEnabled = false,
+                countdownLast3BreakEnabled = false,
             ),
         )
         engine.start(nowEpochMillis = 0L)
@@ -26,23 +26,23 @@ class TimerRuntimeEngineTest {
     }
 
     @Test
-    fun countdown_overrides_regular_interval_in_last_five_seconds() {
+    fun countdown_overrides_regular_interval_in_last_three_seconds() {
         val engine = TimerRuntimeEngine(
             config = RuntimeConfig(
                 totalDurationSeconds = 10,
                 breakDurationSeconds = 0,
                 enabledIntervals = setOf(1, 5),
-                countdownLast5TimerEnabled = true,
-                countdownLast5BreakEnabled = false,
+                countdownLast3TimerEnabled = true,
+                countdownLast3BreakEnabled = false,
             ),
         )
         engine.start(nowEpochMillis = 0L)
-        val step = engine.step(nowEpochMillis = 5_050L)
+        val step = engine.step(nowEpochMillis = 7_050L)
 
         val cue = step.cue
         assertTrue(cue is RuntimeCue.CountdownTick)
         assertEquals(RuntimePhase.Active, cue.phase)
-        assertEquals(5, cue.secondsRemaining)
+        assertEquals(3, cue.secondsRemaining)
     }
 
     @Test
@@ -52,8 +52,8 @@ class TimerRuntimeEngineTest {
                 totalDurationSeconds = 5,
                 breakDurationSeconds = 5,
                 enabledIntervals = setOf(1),
-                countdownLast5TimerEnabled = true,
-                countdownLast5BreakEnabled = true,
+                countdownLast3TimerEnabled = true,
+                countdownLast3BreakEnabled = true,
             ),
         )
         engine.start(nowEpochMillis = 0L)

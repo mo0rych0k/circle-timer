@@ -17,8 +17,8 @@ public interface TimerStore : Store<TimerStore.Intent, TimerStore.State, Nothing
         public data class UpdateDuration(public val seconds: Int) : Intent
         public data class ToggleInterval(public val seconds: Int) : Intent
         public data class UpdateBreakDuration(public val seconds: Int) : Intent
-        public data class SetCountdownLast5TimerEnabled(public val enabled: Boolean) : Intent
-        public data class SetCountdownLast5BreakEnabled(public val enabled: Boolean) : Intent
+        public data class SetCountdownLast3TimerEnabled(public val enabled: Boolean) : Intent
+        public data class SetCountdownLast3BreakEnabled(public val enabled: Boolean) : Intent
         public data object DismissNotificationPermissionSheet : Intent
         public data object RequestNotificationPermission : Intent
         public data class NotificationPermissionRequestResult(public val granted: Boolean) : Intent
@@ -28,6 +28,7 @@ public interface TimerStore : Store<TimerStore.Intent, TimerStore.State, Nothing
 
     public data class State(
         public val isRunning: Boolean = false,
+        public val preStartCountdownSeconds: Int? = null,
         public val elapsedMillis: Long = 0L,
         public val progress: Float = 0f,
         public val phase: TimerPhase = TimerPhase.Active,
